@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Submission</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+</head>
+<body>
+    <h1>Submit Text</h1>
+    <form id="textForm">
+        <label for="textInput">Enter text:</label>
+        <input type="text" id="textInput" name="textInput" required>
+        <button type="submit">Submit</button>
+    </form>
+
+    <p id="responseMessage"></p>
+    <p id="responseUrl"></p>
+
+    <script src="{% static 'scripts.js' %}"></script>
+</body>
+</html>

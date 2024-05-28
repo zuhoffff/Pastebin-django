@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -40,7 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     # my apps:
-    
+    'pastebin_main_app'
 ]
 
 MIDDLEWARE = [
@@ -77,29 +78,31 @@ WSGI_APPLICATION = 'pastebin.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
+from os import environ
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'metadata_db',
-        'USER': 'postgres',
-        'PASSWORD': 'postgres',
-        'HOST': 'localhost',  # Set to your database host
-        'PORT': '5432',       # Default PostgreSQL port
+        'NAME': environ.get('POSTGRES_DB', 'metadata'),
+        'USER': environ.get('POSTGRES_USER', 'postgres'),
+        'PASSWORD': environ.get('POSTGRES_PASSWORD', 'postgres'),
+        'HOST': environ.get('POSTGRES_HOST', '0.0.0.0'),
+        'PORT': environ.get('POSTGRES_PORT', '5432'),
     }
 }
 
-CACHES = {
-    'default': {
-        'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': 'redis://127.0.0.1:6379/1',
-        'OPTIONS': {
-            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
-        }
-    }
-}
+# CACHES = {
+#     'default': {
+#         'BACKEND': 'django_redis.cache.RedisCache',
+#         'LOCATION': 'redis://127.0.0.1:6379/1',
+#         'OPTIONS': {
+#             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+#         }
+#     }
+# }
 
 # Cache time to live is 15 minutes.
-CACHE_TTL = 60 * 15
+# CACHE_TTL = 60 * 15
 
 
 # Password validation
@@ -137,6 +140,14 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
 STATIC_URL = 'static/'
+
+# # Add these lines if you have additional static files outside apps' static directories
+# STATICFILES_DIRS = [
+#     os.path.join(BASE_DIR, "static"),
+# ]
+
+# # Directory where collectstatic will collect static files for deployment
+# STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
