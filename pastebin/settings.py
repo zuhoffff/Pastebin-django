@@ -86,7 +86,7 @@ DATABASES = {
         'NAME': environ.get('POSTGRES_DB', 'metadata'),
         'USER': environ.get('POSTGRES_USER', 'postgres'),
         'PASSWORD': environ.get('POSTGRES_PASSWORD', 'postgres'),
-        'HOST': environ.get('POSTGRES_HOST', '0.0.0.0'),
+        'HOST': environ.get('POSTGRES_HOST', 'metadata_db'),
         'PORT': environ.get('POSTGRES_PORT', '5432'),
     }
 }
@@ -153,3 +153,5 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+APPEND_SLASH=False
