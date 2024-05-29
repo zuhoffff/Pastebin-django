@@ -5,16 +5,17 @@ document.getElementById('textForm').addEventListener('submit', function(event) {
     const timestamp = new Date().toISOString();
     const userAgent = navigator.userAgent;
 
-    fetch('/submit-text', {
+    const formData = new URLSearchParams();
+    formData.append('text', textInput);
+    formData.append('timestamp', timestamp);
+    formData.append('userAgent', userAgent);
+
+    fetch('/submit-text/', {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/x-www-form-urlencoded',
         },
-        body: JSON.stringify({
-            text: textInput,
-            timestamp: timestamp,
-            userAgent: userAgent,
-        })
+        body: formData.toString()
     })
     .then(response => response.json())
     .then(data => {
