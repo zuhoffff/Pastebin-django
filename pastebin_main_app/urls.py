@@ -6,5 +6,5 @@ from .get_text import get_text
 urlpatterns = [
     path("", home, name='home'),
     path('submit-text/', submit_text, name='submit_text'),
-    path('get-text/<str:block_id>/',get_text, name='get_text')
+    path('block/<str:block_id>/',get_text, name='get_text')
 ]
