@@ -13,3 +13,10 @@ BUCKET_NAME=environ.get('BUCKET_NAME')
 s3=boto3.client('s3',
                 aws_access_key_id=key_id,
                 aws_secret_access_key=secret_key)
+
+# Check if the S3 connection is successful
+try:
+    s3.list_buckets()
+    LOGGER.info('Connected to S3 successfully.')
+except Exception as e:
+    LOGGER.error('Failed to connect to S3:', exc_info=True)
