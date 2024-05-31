@@ -1,93 +1,88 @@
 import base64
-import threading
-import time
-from sqlalchemy import create_engine, Column, Integer, String, Boolean, text
-from sqlalchemy.orm import sessionmaker, declarative_base
-from os import environ
-from sqlalchemy.exc import OperationalError
-from sqlalchemy_utils import database_exists, create_database
 import logging
+from os import environ
+from sqlalchemy import create_engine, Column, Integer, String, Boolean, func
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-LOGGER = logging.getLogger(__name__)
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
+# Database connection parameters
 db_user = environ.get('POSTGRES_USER')
 db_pass = environ.get('POSTGRES_PASSWORD')
 db_host = environ.get('POSTGRES_HOST')
 db_name = environ.get('POSTGRES_DB')
+DB_URL = (f'postgresql://{db_user}:{db_pass}@{db_host}/{db_name}')
 
+# Specify configuration constants 
 HASH_POOL = 10
 CHECK_PERIOD = 1
 
+# SQLAlchemy setup
+engine = create_engine(DB_URL)
+Session = sessionmaker(bind=engine)
 Base = declarative_base()
 
-# Define the Hash table model
+# Define the Hash model
 class Hash(Base):
-    __tablename__ = db_name
-
-    id = Column(Integer, primary_key=True)
+    __tablename__ = 'hashes'
+    id = Column(Integer, primary_key=True, autoincrement=True)
     hash = Column(String, nullable=False)
     used = Column(Boolean, default=False)
-    
-# Create db engine
-# Create the `hashes` database if it does not exist
-engine = create_engine(f'postgresql://{db_user}:{db_pass}@{db_host}/{db_name}')
-if not database_exists(engine.url): create_database(engine.url)
 
-# Create a database session
-Session = sessionmaker(bind=engine)
-session = Session()
-
-def initialize_table():
+# Initialize the database and table
+def setup_database():
+    logger.info('Setting up the database.')
     Base.metadata.create_all(engine)
+    logger.info('Database setup complete.')
 
+# Generate a new hash based on the id
 def generate_hash(id):
     return base64.b64encode(str(id).encode()).decode()
 
-def count_unused_hashes():
-    return session.query(Hash).filter_by(used=False).count()
-
-def ensure_spare_hashes():
-    while True:
-        unused_count = count_unused_hashes()
-        if unused_count < HASH_POOL:
-            new_hash_id = session.query(Hash).count() + 1
-            new_hash = Hash(id=new_hash_id, hash=generate_hash(new_hash_id))
-
-            LOGGER.info(new_hash)
-            
-            session.add(new_hash)
-            session.commit()
-        time.sleep(CHECK_PERIOD)
-
-def get_next_unused_hash():
-    next_hash = session.query(Hash).filter_by(used=False).first()
-    LOGGER.info(next_hash)
-    if next_hash:
-        next_hash.used = True
+# Insert a new hash into the database
+def insert_new_hash():
+    with Session() as session:
+        last_id = session.query(func.max(Hash.id)).scalar() or 0
+        new_hash = generate_hash(last_id + 1)
+        hash_entry = Hash(hash=new_hash)
+        session.add(hash_entry)
         session.commit()
-        return next_hash.hash
-    return None
+        logger.info(f'Inserted new hash: {new_hash}')
 
+# Count unused hashes
+def count_unused_hashes():
+    with Session() as session:
+        count = session.query(func.count(Hash.id)).filter_by(used=False).scalar()
+        logger.info(f'Number of unused hashes: {count}')
+        return count
+
+# Ensure a certain number of spare hashes
+def ensure_spare_hashes(n):
+    logger.info(f'Ensuring at least {n} spare hashes.')
+    current_unused = count_unused_hashes()
+    while current_unused < n:
+        insert_new_hash()
+        current_unused += 1
+
+# Get the next unused hash
+def get_next_unused_hash():
+    with Session() as session:
+        hash_entry = session.query(Hash).filter_by(used=False).order_by(Hash.id).first()
+        if hash_entry:
+            hash_entry.used = True
+            session.commit()
+            logger.info(f'Retrieved unused hash: {hash_entry.hash}')
+            return hash_entry.hash
+        logger.warning('No unused hashes available.')
+        return None
+
+# Main function for initialization
 def main():
-    initialize_table()
-    ensure_spare_hashes()
+    setup_database()
+    ensure_spare_hashes(HASH_POOL)  # Ensure there are at least 10 spare hashes
 
-# For debugging: 
 if __name__ == '__main__':
     main()
-    print(get_next_unused_hash())
-
-
-
-# def generate_hash(seed):
-#     seed_bytes = str(seed).encode("ascii") 
-#     base64_bytes = base64.b64encode(seed_bytes) 
-#     base64_string = base64_bytes.decode("ascii") 
-#     return base64_string
-
-# def decode_hash(hash):
-#     base64_bytes = str(hash).encode("ascii")
-#     base64_bytes = base64.b64decode(base64_bytes) 
-#     original_seed = base64_bytes.decode('ascii')
-#     return original_seed

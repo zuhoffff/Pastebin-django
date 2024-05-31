@@ -21,7 +21,6 @@ class handler(BaseHTTPRequestHandler):
             response = json.dumps({'error'}).encode()
 
         response = json.dumps({'hash': hash_key }).encode()
-
         self.wfile.write(response)
 
 
