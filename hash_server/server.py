@@ -13,7 +13,12 @@ class handler(BaseHTTPRequestHandler):
         self.send_header('content-type', 'application/json')
         self.end_headers()
 
-        hash_key = get_next_unused_hash()
+        try:
+            hash_key = get_next_unused_hash()
+            LOGGER.info(f'Returned hash: {hash_key}')
+        except Exception as e:
+            LOGGER.info('Something is wrong with hash-generator')
+            response = json.dumps({'error'}).encode()
 
         response = json.dumps({'hash': hash_key }).encode()
 
@@ -25,7 +30,7 @@ def main():
     hash_gen_main()
 
     HOST = environ.get('HOST',default='0.0.0.0')
-    PORT = environ.get('PORT',default='8001')
+    PORT = int( environ.get('PORT',default=8000) )
 
     server_address = (HOST,PORT)
 

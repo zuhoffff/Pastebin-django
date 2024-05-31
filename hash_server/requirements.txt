@@ -1,2 +1,5 @@
 sqlalchemy==2.0.30
 psycopg2-binary==2.9.9
+SQLAlchemy-Utils==0.41.2
+greenlet==3.0.3
+typing_extensions==4.12.0

@@ -24,11 +24,13 @@ def submit_text(request):
             # Make request to hash-server
             try:
                 resp = requests.get(environ.get('HASH_SERVER_URI'))
+                resp.raise_for_status()
                 curr_key=resp.json().get('hash')
-
+                LOGGER.info(f'Obtained hash: ***')
+                
             except Exception as e:
-                LOGGER.info(f'Could not get hash from the hash-server.. {e}')
-                return JsonResponse({'error': 'Hash-server error...'}, status=500)
+                LOGGER.info(f'Could not get hash from the hash-server {e}')
+                return JsonResponse({'error': 'Hash-server error:'}, status=500)
 
             # Save the metadata to your database
             new_entry = Metadata.objects.create(
@@ -67,15 +69,3 @@ def submit_text(request):
         return JsonResponse({'error': 'Invalid request method'}, status=405)
     
 import base64
-
-def generate_hash(seed):
-    seed_bytes = str(seed).encode("ascii") 
-    base64_bytes = base64.b64encode(seed_bytes) 
-    base64_string = base64_bytes.decode("ascii") 
-    return base64_string
-
-def decode_hash(hash):
-    base64_bytes = str(hash).encode("ascii")
-    base64_bytes = base64.b64decode(base64_bytes) 
-    original_seed = base64_bytes.decode('ascii')
-    return original_seed
