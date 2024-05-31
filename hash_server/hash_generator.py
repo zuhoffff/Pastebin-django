@@ -5,7 +5,16 @@ from sqlalchemy import create_engine, Column, Integer, String, Boolean, text
 from sqlalchemy.orm import sessionmaker, declarative_base
 from os import environ
 from sqlalchemy.exc import OperationalError
+from sqlalchemy_utils import database_exists, create_database
+import logging
 
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+LOGGER = logging.getLogger(__name__)
+
+db_user = environ.get('POSTGRES_USER')
+db_pass = environ.get('POSTGRES_PASSWORD')
+db_host = environ.get('POSTGRES_HOST')
+db_name = environ.get('POSTGRES_DB')
 
 HASH_POOL = 10
 CHECK_PERIOD = 1
@@ -14,31 +23,18 @@ Base = declarative_base()
 
 # Define the Hash table model
 class Hash(Base):
-    __tablename__ = 'hashes'
+    __tablename__ = db_name
 
     id = Column(Integer, primary_key=True)
     hash = Column(String, nullable=False)
     used = Column(Boolean, default=False)
-
-def create_database_if_not_exists(engine, database_name):
-    try:
-        # Connect to the default database to create a new one
-        engine.execute(text(f"CREATE DATABASE {database_name}"))
-        print(f"Database '{database_name}' created successfully.")
-    except OperationalError as e:
-        if "already exists" in str(e):
-            print(f"Database '{database_name}' already exists.")
-        else:
-            raise
-
-# Create an engine that connects to the default database
-default_engine = create_engine("postgresql://postgres:password@hash-db:5432/postgres")
-
+    
+# Create db engine
 # Create the `hashes` database if it does not exist
-create_database_if_not_exists(default_engine, "hashes")
+engine = create_engine(f'postgresql://{db_user}:{db_pass}@{db_host}/{db_name}')
+if not database_exists(engine.url): create_database(engine.url)
 
-# Create a database engine and session
-engine = create_engine(environ.get('POSTGRES_URL'))
+# Create a database session
 Session = sessionmaker(bind=engine)
 session = Session()
 
@@ -57,24 +53,41 @@ def ensure_spare_hashes():
         if unused_count < HASH_POOL:
             new_hash_id = session.query(Hash).count() + 1
             new_hash = Hash(id=new_hash_id, hash=generate_hash(new_hash_id))
+
+            LOGGER.info(new_hash)
+            
             session.add(new_hash)
+            session.commit()
         time.sleep(CHECK_PERIOD)
 
 def get_next_unused_hash():
-    next_hash = session.query(Hash).filter_by(used=False).order_by(Hash.id).first()
+    next_hash = session.query(Hash).filter_by(used=False).first()
+    LOGGER.info(next_hash)
     if next_hash:
         next_hash.used = True
         session.commit()
         return next_hash.hash
     return None
 
-def hash_generator_thread():
-    threading.Thread(target=ensure_spare_hashes, daemon=True).start()
-
 def main():
     initialize_table()
-    hash_generator_thread()
+    ensure_spare_hashes()
 
+# For debugging: 
 if __name__ == '__main__':
     main()
     print(get_next_unused_hash())
+
+
+
+# def generate_hash(seed):
+#     seed_bytes = str(seed).encode("ascii") 
+#     base64_bytes = base64.b64encode(seed_bytes) 
+#     base64_string = base64_bytes.decode("ascii") 
+#     return base64_string
+
+# def decode_hash(hash):
+#     base64_bytes = str(hash).encode("ascii")
+#     base64_bytes = base64.b64decode(base64_bytes) 
+#     original_seed = base64_bytes.decode('ascii')
+#     return original_seed

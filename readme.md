@@ -13,7 +13,7 @@ features:
 ## 3.Such url can be used to access the metadata in the db
 ## 4.Metadata stores the actual key to s3 storage
 ## Hashing server: 
-1. firtly hash-server will its db with seeds for future hashes\
+1. firtly hash-server will its db with seeds for future hashes \
 1. make urls unique -> make hashing server for this purpose\
 1. and implement CASHING for hashes (redis)\
 1. also implement multithreading to it\
