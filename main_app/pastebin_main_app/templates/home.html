@@ -5,13 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Text Submission</title>
     {% load static %}
-    <link rel="stylesheet" href="{% static 'styles.css' %}">
+    <link rel="stylesheet" href="{% static 'styles_home.css' %}">
 </head>
 <body>
     <h1>Submit Text</h1>
     <form id="textForm" action="/submit-text/" method="post">
         <label for="textInput">Enter text:</label>
         <input type="text" id="textInput" name="textInput" required>
+
+        <label for="authorInput">Author (optional):</label>
+        <input type="text" id="authorInput" name="authorInput" pattern="[a-zA-Z0-9_@-]*" title="Author name can only contain letters, numbers, and _ @ -">
+        
         <button type="submit">Submit</button>
     </form>
 
