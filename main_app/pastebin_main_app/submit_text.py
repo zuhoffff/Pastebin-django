@@ -5,7 +5,7 @@ import logging
 from main_app.pastebin_main_app.s3_handler import upload_to_s3
 import requests
 from os import environ
-from expiry_controller import run_expiry_controller, add_event
+from expiry_controller import add_event
 
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
