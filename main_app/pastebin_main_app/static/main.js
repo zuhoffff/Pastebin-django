@@ -21,18 +21,9 @@ document.getElementById('textForm').addEventListener('submit', function(event) {
 
     const textInput = document.getElementById('textInput').value;
     const authorInput = document.getElementById('authorInput').value;
-    const timestamp = new Date().toISOString();
+    const timestamp = new Date();
+    const expirationTime = calculateExpirationTime(timestamp);
     const userAgent = navigator.userAgent;
-
-    // Calculate expiration time
-    const days = parseInt(daysColumn.querySelector('.selected').innerText);
-    const hours = parseInt(hoursColumn.querySelector('.selected').innerText);
-    const minutes = parseInt(minutesColumn.querySelector('.selected').innerText);
-
-    const expirationTime = new Date();
-    expirationTime.setDate(expirationTime.getDate() + days);
-    expirationTime.setHours(expirationTime.getHours() + hours);
-    expirationTime.setMinutes(expirationTime.getMinutes() + minutes);
     
     // Validate author input
     const authorPattern = /^[a-zA-Z0-9_@-]*$/;
@@ -43,8 +34,8 @@ document.getElementById('textForm').addEventListener('submit', function(event) {
     
     const formData = new URLSearchParams();
     formData.append('text', textInput);
-    formData.append('expirationTime', expirationTime.toISOString());
-    formData.append('timestamp', timestamp);
+    formData.append('expirationTime', expirationTime.getTime());
+    formData.append('timestamp', timestamp.getTime());
     formData.append('userAgent', userAgent);
     formData.append('author', authorInput);
 
@@ -76,3 +67,19 @@ document.querySelectorAll('.column').forEach(column => {
         event.target.classList.add('selected');
     });
 });
+
+function calculateExpirationTime(time_now) {
+    const selectedDays = parseInt(document.getElementById('days').querySelector('.selected').textContent);
+    const selectedHours = parseInt(document.getElementById('hours').querySelector('.selected').textContent);
+    const selectedMinutes = parseInt(document.getElementById('minutes').querySelector('.selected').textContent);
+
+    // Create a new Date object based on the current time
+    const expirationDate = new Date(time_now);
+
+    // Calculate expiration time by adding selected days, hours, and minutes
+    expirationDate.setDate(expirationDate.getDate() + selectedDays);
+    expirationDate.setHours(expirationDate.getHours() + selectedHours);
+    expirationDate.setMinutes(expirationDate.getMinutes() + selectedMinutes);
+
+    return expirationDate; // Return the expiration time as a Date object
+}
