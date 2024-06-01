@@ -63,9 +63,14 @@ def submit_text(request):
     timestamp = request.POST.get('timestamp')
     user_agent = request.POST.get('userAgent')
     author = request.POST.get('author')
+    #TODO: MAKE SURE TIME FORMAT OF EXPIERY DATA CORRESPONDS TO TIMESTAMP TIME FORMAT. and delete temporary logger
+    expirationTime = request.POST.get('expirationTime')
+    LOGGER.info(expirationTime)
+    LOGGER.info(timestamp)
+
     if not author:  author='Anonymous' # make sure the variable is not empty string or None
 
-    if not (text_input and timestamp and user_agent):
+    if not (text_input and timestamp and user_agent and expirationTime):
         return JsonResponse({'error': ERROR_MISSING_DATA}, status=400)
 
     LOGGER.info('Data received')
