@@ -2,10 +2,11 @@ from django.http import JsonResponse
 from .models import Metadata
 from django.views.decorators.csrf import csrf_exempt
 import logging
-from pastebin_main_app.setup_s3 import s3, BUCKET_NAME
-from botocore.exceptions import NoCredentialsError, PartialCredentialsError, ClientError
+from main_app.pastebin_main_app.s3_handler import upload_to_s3
 import requests
 from os import environ
+from expiry_controller import run_expiry_controller, add_event
+
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 LOGGER = logging.getLogger(__name__)
@@ -40,20 +41,6 @@ def save_metadata(timestamp, user_agent, s3_key, author):
     LOGGER.info('Database entry added')
     return new_entry
 
-def upload_to_s3(s3_key, text_input):
-    try:
-        s3.put_object(Bucket=BUCKET_NAME, Key=str(s3_key), Body=str(text_input))
-        LOGGER.info('Object uploaded to S3')
-    except (NoCredentialsError, PartialCredentialsError) as e:
-        LOGGER.error(f'{ERROR_CREDENTIALS}: {e}')
-        raise
-    except ClientError as e:
-        LOGGER.error(f'{ERROR_CLIENT}: {e}')
-        raise
-    except Exception as e:
-        LOGGER.error(f'{ERROR_GENERIC}: {e}')
-        raise
-
 @csrf_exempt
 def submit_text(request):
     if request.method != 'POST':
@@ -63,12 +50,10 @@ def submit_text(request):
     timestamp = request.POST.get('timestamp')
     user_agent = request.POST.get('userAgent')
     author = request.POST.get('author')
-    #TODO: MAKE SURE TIME FORMAT OF EXPIERY DATA CORRESPONDS TO TIMESTAMP TIME FORMAT. and delete temporary logger
     expirationTime = request.POST.get('expirationTime')
-    LOGGER.info(expirationTime)
-    LOGGER.info(timestamp)
-
-    if not author:  author='Anonymous' # make sure the variable is not empty string or None
+    
+    # To make sure the variable is not empty string neither None
+    if not author:  author='Anonymous' 
 
     if not (text_input and timestamp and user_agent and expirationTime):
         return JsonResponse({'error': ERROR_MISSING_DATA}, status=400)
@@ -84,6 +69,10 @@ def submit_text(request):
         upload_to_s3(s3_key, text_input)
 
         curr_url = f'/block/{new_entry.id}/'
+
+        # Add the pasete to expiry register
+        add_event(expiry_time=expirationTime, id=new_entry.id)
+
         return JsonResponse({'message': 'Text saved successfully', 'url': curr_url})
 
     except Exception as e:
