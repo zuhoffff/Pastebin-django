@@ -29,11 +29,12 @@ def get_hash_from_server():
         LOGGER.error(f'Error getting hash from hash-server: {e}')
         raise
 
-def save_metadata(timestamp, user_agent, s3_key):
+def save_metadata(timestamp, user_agent, s3_key, author):
     new_entry = Metadata.objects.create(
         timestamp=timestamp,
         user_agent=user_agent,
-        s3_key=s3_key
+        s3_key=s3_key,
+        author=author
     )
     new_entry.save()
     LOGGER.info('Database entry added')
@@ -61,6 +62,8 @@ def submit_text(request):
     text_input = request.POST.get('text')
     timestamp = request.POST.get('timestamp')
     user_agent = request.POST.get('userAgent')
+    author = request.POST.get('author')
+    if not author:  author='Anonymous' # make sure the variable is not empty string or None
 
     if not (text_input and timestamp and user_agent):
         return JsonResponse({'error': ERROR_MISSING_DATA}, status=400)
@@ -71,7 +74,7 @@ def submit_text(request):
         s3_key = get_hash_from_server()
         LOGGER.info(f'Obtained hash: {s3_key}')
 
-        new_entry = save_metadata(timestamp, user_agent, s3_key)
+        new_entry = save_metadata(timestamp, user_agent, s3_key, author)
         
         upload_to_s3(s3_key, text_input)
 

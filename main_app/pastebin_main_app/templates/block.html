@@ -5,13 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pastebin - View Paste</title>
     {% load static %}
-    <link rel="stylesheet" href="{% static 'styles.css' %}">
+    <link rel="stylesheet" href="{% static 'styles_block.css' %}">
 </head>
 <body>
-    <h1> Paste ID: {{ block_id }} </h1>
+    <h1>Paste ID: {{ block_id }}</h1>
     <div id="pasteContent">
         <pre>{{ text }}</pre>
+        {% if author %}
+        <p class="footer">Author: {{ author }}</p>
+        {% endif %}
     </div>
-    <a href="/">Create New Paste</a>
+    <div class="footer">
+        <a href="/">Create New Paste</a>
+    </div>
 </body>
 </html>
