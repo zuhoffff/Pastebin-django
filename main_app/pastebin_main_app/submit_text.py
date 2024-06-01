@@ -10,62 +10,73 @@ from os import environ
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 LOGGER = logging.getLogger(__name__)
 
+HASH_SERVER_URI = environ.get('HASH_SERVER_URI')
+
+# Constants for error messages
+ERROR_HASH_SERVER = 'Hash-server error'
+ERROR_CREDENTIALS = 'Credentials error'
+ERROR_CLIENT = 'Client error'
+ERROR_GENERIC = 'An error occurred'
+ERROR_MISSING_DATA = 'Missing data'
+ERROR_INVALID_METHOD = 'Invalid request method'
+
+def get_hash_from_server():
+    try:
+        response = requests.get(HASH_SERVER_URI)
+        response.raise_for_status()
+        return response.json().get('hash')
+    except requests.RequestException as e:
+        LOGGER.error(f'Error getting hash from hash-server: {e}')
+        raise
+
+def save_metadata(timestamp, user_agent, s3_key):
+    new_entry = Metadata.objects.create(
+        timestamp=timestamp,
+        user_agent=user_agent,
+        s3_key=s3_key
+    )
+    new_entry.save()
+    LOGGER.info('Database entry added')
+    return new_entry
+
+def upload_to_s3(s3_key, text_input):
+    try:
+        s3.put_object(Bucket=BUCKET_NAME, Key=str(s3_key), Body=str(text_input))
+        LOGGER.info('Object uploaded to S3')
+    except (NoCredentialsError, PartialCredentialsError) as e:
+        LOGGER.error(f'{ERROR_CREDENTIALS}: {e}')
+        raise
+    except ClientError as e:
+        LOGGER.error(f'{ERROR_CLIENT}: {e}')
+        raise
+    except Exception as e:
+        LOGGER.error(f'{ERROR_GENERIC}: {e}')
+        raise
 
 @csrf_exempt
 def submit_text(request):
-    if request.method == 'POST':
-        text_input = request.POST.get('text')
-        timestamp = request.POST.get('timestamp')
-        user_agent = request.POST.get('userAgent')
-
-        if text_input and timestamp and user_agent:
-            LOGGER.info('Data receiced!')
-            
-            # Make request to hash-server
-            try:
-                resp = requests.get(environ.get('HASH_SERVER_URI'))
-                resp.raise_for_status()
-                curr_key=resp.json().get('hash')
-                LOGGER.info(f'Obtained hash: ***')
-                
-            except Exception as e:
-                LOGGER.info(f'Could not get hash from the hash-server {e}')
-                return JsonResponse({'error': 'Hash-server error:'}, status=500)
-
-            # Save the metadata to your database
-            new_entry = Metadata.objects.create(
-                timestamp=timestamp,
-                user_agent=user_agent,
-                s3_key=curr_key 
-            )
-            new_entry.save()
-
-            LOGGER.info('db entry added')
-
-            # Save the text into s3 blobstore:
-            try:
-                s3.put_object(Bucket=BUCKET_NAME, Key=str(curr_key), Body=str(text_input)) # key must be string
-                LOGGER.info('Object uploaded, trying to send link')
-
-                curr_url=f'/block/{new_entry.id}/'
-                return JsonResponse({'message': 'Text saved successfully', 'url': curr_url})
-            
-            except (NoCredentialsError, PartialCredentialsError) as e:
-                LOGGER.info({'error': 'Credentials error'})
-                return JsonResponse({'error': 'Credentials error'}, status=500)
-            
-            except ClientError as e:
-                LOGGER.info({'error': 'Client error'})
-                return JsonResponse({'error': 'Client error'}, status=500)
-            
-            except Exception as e:
-                LOGGER.info({'error': 'An error occurred'})
-                return JsonResponse({'error': 'An error occurred'}, status=500)
-        
-        else:
-            return JsonResponse({'error': 'Missing data'}, status=400)
-        
-    else:
-        return JsonResponse({'error': 'Invalid request method'}, status=405)
+    if request.method != 'POST':
+        return JsonResponse({'error': ERROR_INVALID_METHOD}, status=405)
     
-import base64
+    text_input = request.POST.get('text')
+    timestamp = request.POST.get('timestamp')
+    user_agent = request.POST.get('userAgent')
+
+    if not (text_input and timestamp and user_agent):
+        return JsonResponse({'error': ERROR_MISSING_DATA}, status=400)
+
+    LOGGER.info('Data received')
+
+    try:
+        s3_key = get_hash_from_server()
+        LOGGER.info(f'Obtained hash: {s3_key}')
+
+        new_entry = save_metadata(timestamp, user_agent, s3_key)
+        
+        upload_to_s3(s3_key, text_input)
+
+        curr_url = f'/block/{new_entry.id}/'
+        return JsonResponse({'message': 'Text saved successfully', 'url': curr_url})
+
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
