@@ -24,20 +24,44 @@
 
     <script>
         function startTimer(duration, display) {
-            var timer = duration, minutes, seconds;
-            setInterval(function () {
-                minutes = parseInt(timer / 60, 10);
-                seconds = parseInt(timer % 60, 10);
+        var timer = duration, minutes, seconds;
+        var intervalId = setInterval(function () {
+            minutes = parseInt(timer / 60, 10);
+            seconds = parseInt(timer % 60, 10);
 
-                minutes = minutes < 10 ? "0" + minutes : minutes;
-                seconds = seconds < 10 ? "0" + seconds : seconds;
+            minutes = minutes < 10 ? "0" + minutes : minutes;
+            seconds = seconds < 10 ? "0" + seconds : seconds;
 
-                display.textContent = minutes + ":" + seconds;
+            display.textContent = minutes + ":" + seconds;
 
-                if (--timer < 0) {
-                    timer = duration;
-                }
-            }, 1000);
+            if (--timer < 0) {
+                clearInterval(intervalId); // Stop the timer
+                display.textContent = "00:00"; // Update display to show 00:00
+                showExpiredPage(); // Call function to display expired page
+            }
+        }, 1000);
+        }
+
+        function showExpiredPage() {
+            // Replace current HTML content with expired page HTML
+            document.documentElement.innerHTML = `
+                <!DOCTYPE html>
+                <html lang="en">
+                <head>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title>Expired Post</title>
+                    {% load static %}
+                    <link rel="stylesheet" href="{% static 'expired.css' %}">
+                </head>
+                <body>
+                    <div class="container">
+                        <h1>This Page Has Expired</h1>
+                        <p>Sorry, the content you are trying to access has expired.</p>
+                    </div>
+                </body>
+                </html>
+            `;
         }
 
         window.onload = function () {
