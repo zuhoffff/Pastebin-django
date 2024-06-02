@@ -2,7 +2,7 @@ from django.http import JsonResponse
 from .models import Metadata
 from django.views.decorators.csrf import csrf_exempt
 import logging
-from main_app.pastebin_main_app.s3_handler import retrieve_from_s3
+from pastebin_main_app.s3_handler import retrieve_from_s3
 from django.shortcuts import render
 from botocore.exceptions import NoCredentialsError, PartialCredentialsError, ClientError
 

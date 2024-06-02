@@ -3,7 +3,7 @@ const daysColumn = document.getElementById('days');
 const hoursColumn = document.getElementById('hours');
 const minutesColumn = document.getElementById('minutes');
 
-for (let i = 1; i <= 30; i++) {
+for (let i = 0; i <= 30; i++) {
     daysColumn.innerHTML += `<div>${i} days</div>`;
 }
 
@@ -11,7 +11,7 @@ for (let i = 0; i < 24; i++) {
     hoursColumn.innerHTML += `<div>${i} hours</div>`;
 }
 
-for (let i = 0; i < 60; i++) {
+for (let i = 1; i < 60; i++) {
     minutesColumn.innerHTML += `<div>${i} minutes</div>`;
 }
 
