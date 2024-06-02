@@ -1,6 +1,6 @@
 body {
-    font-family: Arial, sans-serif;
-    background-color: #2b6196;
+    font-family: 'Roboto', Arial, sans-serif;
+    background-color: #f4f6f8;
     color: #343a40;
     margin: 0;
     padding: 20px;
@@ -10,40 +10,73 @@ body {
     justify-content: center;
     height: 100vh;
 }
+
 h1 {
     background-color: #007bff;
     color: white;
-    padding: 10px 20px;
-    border-radius: 5px;
+    padding: 15px 25px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
 }
+
 #pasteContent {
     background-color: white;
-    padding: 20px;
+    padding: 30px;
     margin-top: 20px;
     border: 1px solid #dee2e6;
-    border-radius: 5px;
+    border-radius: 10px;
     width: 80%;
     max-width: 800px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
+
 pre {
     white-space: pre-wrap;
     word-wrap: break-word;
+    font-size: 16px;
+    line-height: 1.5;
 }
+
 .footer {
     margin-top: 20px;
     font-size: 0.9em;
     color: #6c757d;
+    text-align: center;
 }
+
 .footer a {
     color: #007bff;
     text-decoration: none;
+    font-weight: bold;
 }
+
 .footer a:hover {
     text-decoration: underline;
 }
+
 .timer {
     font-size: 18px;
     color: #333;
     margin-top: 20px;
-}   
+    padding: 10px 20px;
+    background-color: #e9ecef;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+@media (max-width: 600px) {
+    #pasteContent {
+        width: 100%;
+        padding: 20px;
+    }
+
+    h1 {
+        padding: 10px 15px;
+    }
+
+    .timer {
+        font-size: 16px;
+        padding: 8px 15px;
+    }
+}
