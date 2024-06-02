@@ -1,9 +1,5 @@
 // Ensure the script executes after the DOM is fully loaded
 document.addEventListener('DOMContentLoaded', (event) => {
-    alert('JavaScript file loaded!');
-    // or
-    console.log('JavaScript file loaded!');
-    
     // Get the expiry time from the data attribute
     const timerElement = document.getElementById('timer');
     const expiryTime = parseFloat(timerElement.getAttribute('data-expiry'));

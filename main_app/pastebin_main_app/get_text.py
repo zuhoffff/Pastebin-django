@@ -10,6 +10,8 @@ from botocore.exceptions import NoCredentialsError, PartialCredentialsError, Cli
 @csrf_exempt
 def get_text(request, block_id):
     if request.method == 'GET':    
+
+        # Try to get the by url tail (id) 
         try:
             metadata = Metadata.objects.get(pk=block_id) # pk - primary key (id)
             curr_author = metadata.author
@@ -18,18 +20,15 @@ def get_text(request, block_id):
         except metadata.DoesNotExist as e:
             return JsonResponse({f'error': 'database error  {e}'}, status=500)
 
+        # Try to get the text from s3
         try:
             text=retrieve_from_s3(curr_key)
 
             return render(request, 'block.html', {'block_id': block_id, 'text': text, 'author': curr_author, 'expiry': curr_expiry})
-        
-        except (NoCredentialsError, PartialCredentialsError) as e:
-            return JsonResponse({f'error': 'Credentials error {e}'}, status=500)
-        
-        except ClientError as e:
-            return JsonResponse({f'error': 'Client error {e}'}, status=500)
-        
+                
         except Exception as e:
-            return JsonResponse({f'error': 'An error occurred {e}'}, status=500)
+            # if it isn't there, it's probably expired
+            return render(request, 'expired.html')
+            
     else:
         return JsonResponse({'error': 'Invalid request method'}, status=405)

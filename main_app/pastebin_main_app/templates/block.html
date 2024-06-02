@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pastebin - View Paste</title>
     {% load static %}
-    <link rel="stylesheet" href="{% static 'styles_block.css' %}">
+    <link rel="stylesheet" href="{% static 'block.css' %}">
 </head>
 <body>
     <h1>Paste ID: {{ block_id }}</h1>
@@ -18,10 +18,8 @@
     <div class="footer">
         <a href="/">Create New Paste</a>
     </div>
-    <div class="timer" id="timer"></div>
-
-    <!-- Hidden element to store expiry time -->
-    <div id="expiry-data" data-expiry="{{ expiry }}" style="display: none;"></div>
+    <div class="timer" id="timer" data-expiry="{{ expiry }}"></div>
+    
 
     <script src="{% static 'timer.js' %}"></script>
 </body>

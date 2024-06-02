@@ -69,7 +69,6 @@ def delete_expired_entry(id):
     LOGGER.info(f'Deleting expired entry with id: {id}')
     expired_entry = Metadata.objects.get(id=id)
     delete_from_s3(expired_entry.s3_key)
-    expired_entry.delete()
     LOGGER.info('Expired entry deleted.')
 
 def start_expiry_controller():
