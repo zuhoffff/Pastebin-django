@@ -14,13 +14,14 @@ def get_text(request, block_id):
             metadata = Metadata.objects.get(pk=block_id) # pk - primary key (id)
             curr_author = metadata.author
             curr_key = metadata.s3_key
+            curr_expiry=metadata.expiry_time
         except metadata.DoesNotExist as e:
             return JsonResponse({f'error': 'database error  {e}'}, status=500)
 
         try:
             text =retrieve_from_s3(curr_key)
 
-            return render(request, 'block.html', {'block_id': block_id, 'text': text, 'author': curr_author})
+            return render(request, 'block.html', {'block_id': block_id, 'text': text, 'author': curr_author, 'expiry': curr_expiry})
         
         except (NoCredentialsError, PartialCredentialsError) as e:
             return JsonResponse({f'error': 'Credentials error {e}'}, status=500)

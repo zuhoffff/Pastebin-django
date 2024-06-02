@@ -36,6 +36,8 @@ def add_event(expiry_time, id):
     new_event = (expiry_time, id)
     insertion_point = insert_sorted_tuple_list(expiry_registry, new_event)
 
+    LOGGER.info('Event added {} ~ {}'.format(expiry_time, id))
+
     if insertion_point == 0:
         expiry_event.set()
 
@@ -47,13 +49,17 @@ def run_expiry_controller():
             continue
 
         current_time = time.time()
-        soonest_expiry_in = expiry_registry[0][0] - current_time
 
+        # Make sure both are float:
+        soonest_expiry_in = expiry_registry[0][0] - current_time
+        LOGGER.info(f'Time:{expiry_registry[0][0]}\n{current_time}\n{soonest_expiry_in}')
+        LOGGER.info('Performing expiry check for {}'.format(expiry_registry[0][1]))
         if soonest_expiry_in <= 0:
             t = Thread(target=delete_expired_entry, args=(expiry_registry[0][1],))
             t.start()
             expiry_registry.pop(0)
         else:
+            LOGGER.info('Sleeping till the next expiry or adding of new event...')
             expiry_event.wait(timeout=soonest_expiry_in)
             expiry_event.clear()
 

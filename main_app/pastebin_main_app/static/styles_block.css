@@ -42,3 +42,8 @@ pre {
 .footer a:hover {
     text-decoration: underline;
 }
+.timer {
+    font-size: 18px;
+    color: #333;
+    margin-top: 20px;
+}   

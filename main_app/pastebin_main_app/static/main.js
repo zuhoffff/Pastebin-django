@@ -11,7 +11,7 @@ for (let i = 0; i < 24; i++) {
     hoursColumn.innerHTML += `<div>${i} hours</div>`;
 }
 
-for (let i = 1; i < 60; i++) {
+for (let i = 0; i < 60; i++) {
     minutesColumn.innerHTML += `<div>${i} minutes</div>`;
 }
 
