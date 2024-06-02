@@ -19,7 +19,7 @@ def get_text(request, block_id):
             return JsonResponse({f'error': 'database error  {e}'}, status=500)
 
         try:
-            text =retrieve_from_s3(curr_key)
+            text=retrieve_from_s3(curr_key)
 
             return render(request, 'block.html', {'block_id': block_id, 'text': text, 'author': curr_author, 'expiry': curr_expiry})
         

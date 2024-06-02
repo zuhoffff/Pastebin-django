@@ -6,13 +6,6 @@
     <title>Pastebin - View Paste</title>
     {% load static %}
     <link rel="stylesheet" href="{% static 'styles_block.css' %}">
-    <style>
-        .timer {
-            font-size: 18px;
-            color: #333;
-            margin-top: 20px;
-        }
-    </style>
 </head>
 <body>
     <h1>Paste ID: {{ block_id }}</h1>
@@ -27,36 +20,9 @@
     </div>
     <div class="timer" id="timer"></div>
 
-    <script>
-        // Get the expiration time from the backend
-        const expiryTime = JSON.parse('{{ expiry|json_script:"expiry" }}');
-        const timerElement = document.getElementById('timer');
+    <!-- Hidden element to store expiry time -->
+    <div id="expiry-data" data-expiry="{{ expiry }}" style="display: none;"></div>
 
-        // Update the timer every second
-        setInterval(updateTimer, 1000);
-
-        function updateTimer() {
-            // Calculate the remaining time until expiration
-            const currentTime = Math.floor(Date.now() / 1000); // Convert to seconds
-            const remainingTime = expiryTime - currentTime;
-
-            // Check if the paste has expired
-            if (remainingTime <= 0) {
-                timerElement.textContent = 'Paste has expired';
-            } else {
-                // Convert remaining time to hours, minutes, and seconds
-                const hours = Math.floor(remainingTime / 3600);
-                const minutes = Math.floor((remainingTime % 3600) / 60);
-                const seconds = remainingTime % 60;
-
-                // Format the remaining time and display it
-                const formattedTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-                timerElement.textContent = `Time until expiration: ${formattedTime}`;
-            }
-        }
-
-        // Initial call to update timer
-        updateTimer();
-    </script>
+    <script src="{% static 'timer.js' %}"></script>
 </body>
 </html>
