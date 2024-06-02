@@ -15,12 +15,37 @@
         <p class="footer">Author: {{ author }}</p>
         {% endif %}
     </div>
+    <div id="expiryTimer" class="footer">
+        Paste expires in: <span id="timer"></span>
+    </div>
     <div class="footer">
         <a href="/">Create New Paste</a>
     </div>
-    <div class="timer" id="timer" data-expiry="{{ expiry }}"></div>
-    
 
-    <script src="{% static 'timer.js' %}"></script>
-</body>
+    <script>
+        function startTimer(duration, display) {
+            var timer = duration, minutes, seconds;
+            setInterval(function () {
+                minutes = parseInt(timer / 60, 10);
+                seconds = parseInt(timer % 60, 10);
+
+                minutes = minutes < 10 ? "0" + minutes : minutes;
+                seconds = seconds < 10 ? "0" + seconds : seconds;
+
+                display.textContent = minutes + ":" + seconds;
+
+                if (--timer < 0) {
+                    timer = duration;
+                }
+            }, 1000);
+        }
+
+        window.onload = function () {
+            var expiryTime = {{ expiry }};
+            var now = Math.floor(Date.now() / 1000); // Current time in Unix timestamp format
+            var duration = expiryTime - now; // Duration in seconds until expiry
+            var display = document.querySelector('#timer');
+            startTimer(duration, display);
+        };
+    </script>
 </html>
