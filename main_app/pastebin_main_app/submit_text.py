@@ -18,64 +18,62 @@ ERROR_HASH_SERVER = 'Hash-server error'
 ERROR_CREDENTIALS = 'Credentials error'
 ERROR_CLIENT = 'Client error'
 ERROR_GENERIC = 'An error occurred'
-ERROR_MISSING_DATA = 'Missing data'
+ERROR_MISSING_DATA = 'Missing frontend data'
 ERROR_INVALID_METHOD = 'Invalid request method'
 
 def get_hash_from_server():
-    try:
-        response = requests.get(HASH_SERVER_URI)
-        response.raise_for_status()
-        return response.json().get('hash')
-    except requests.RequestException as e:
-        LOGGER.error(f'Error getting hash from hash-server: {e}')
-        raise
-
-def save_metadata(timestamp, user_agent, s3_key, author, expiry_time):
-    new_entry = Metadata.objects.create(
-        timestamp=timestamp,
-        user_agent=user_agent,
-        s3_key=s3_key,
-        author=author,
-        expiry_time=expiry_time
-    )
-    new_entry.save()
-    LOGGER.info('Database entry added')
-    return new_entry
+    response = requests.get(HASH_SERVER_URI)
+    response.raise_for_status()
+    return response.json().get('hash')
 
 @csrf_exempt
 def submit_text(request):
     if request.method != 'POST':
         return JsonResponse({'error': ERROR_INVALID_METHOD}, status=405)
     
+    # Returns None for optional field not specified
     text_input = request.POST.get('text')
     timestamp = request.POST.get('timestamp')
     user_agent = request.POST.get('userAgent')
     author = request.POST.get('author')
-    # Perform conversion to float unix format (format provided by frontend: 1717338855532)
+    password = request.POST.get('password')
+    # Perform conversion to float unix format
     expiry_time = float(request.POST.get('expirationTime'))/1000
-    
-    # To make sure the variable is not empty string neither None
-    if not author:  author='Anonymous' 
 
     if not (text_input and timestamp and user_agent and expiry_time):
+        LOGGER.info(ERROR_MISSING_DATA)
         return JsonResponse({'error': ERROR_MISSING_DATA}, status=400)
 
-    LOGGER.info('Data received')
-
+    # Get hash from the hash-server
     try:
         s3_key = get_hash_from_server()
-        LOGGER.info(f'Obtained hash: {s3_key}')
+    except requests.RequestException as e:
+        LOGGER.error(f'{ERROR_HASH_SERVER},{e}')
+        return JsonResponse({'error': ERROR_HASH_SERVER}, status=400)
 
-        new_entry = save_metadata(timestamp, user_agent, s3_key, author, expiry_time)
-        
+    # Write down to database
+    new_entry = Metadata.objects.create(
+        timestamp=timestamp,
+        user_agent=user_agent,
+        s3_key=s3_key,
+        expiry_time=expiry_time,
+        # Optional:
+        author=author,
+        password=password
+    )
+    new_entry.save()
+
+    # Create url for new paste
+    curr_url = f'/block/{new_entry.id}/'
+
+    # Upload data to s3 blobstore
+    try:
         upload_to_s3(s3_key, text_input)
 
-        curr_url = f'/block/{new_entry.id}/'
-
-        # Add the pasete to expiry register
+        # Add the pasete to expiry registry
         add_event(expiry_time=expiry_time, id=new_entry.id)
 
         return JsonResponse({'message': 'Text saved successfully', 'url': curr_url})
-
+    
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)

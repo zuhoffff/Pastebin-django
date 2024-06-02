@@ -20,10 +20,12 @@ document.getElementById('textForm').addEventListener('submit', function(event) {
     event.preventDefault();
 
     const textInput = document.getElementById('textInput').value;
-    const authorInput = document.getElementById('authorInput').value;
     const timestamp = new Date();
     const expirationTime = calculateExpirationTime(timestamp);
     const userAgent = navigator.userAgent;
+
+    const passwordInput = document.getElementById('passwordInput').value.trim();
+    const authorInput = document.getElementById('authorInput').value.trim();
     
     // Validate author input
     const authorPattern = /^[a-zA-Z0-9_@-]*$/;
@@ -37,8 +39,13 @@ document.getElementById('textForm').addEventListener('submit', function(event) {
     formData.append('expirationTime', expirationTime.getTime());
     formData.append('timestamp', timestamp.getTime());
     formData.append('userAgent', userAgent);
-    formData.append('author', authorInput);
-
+    
+    if (authorInput){
+        formData.append('authorInput', authorInput);
+    }
+    if (passwordInput){ 
+        formData.append('passwordInput', passwordInput);
+    }
 
     // Send POST request with form data
     fetch('/submit-text/', {
