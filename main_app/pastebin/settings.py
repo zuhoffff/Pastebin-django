@@ -44,7 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     # my apps:
-    'pastebin_main_app'
+    'pastebin_main_app.apps.PastebinMainAppConfig'
 ]
 
 MIDDLEWARE = [

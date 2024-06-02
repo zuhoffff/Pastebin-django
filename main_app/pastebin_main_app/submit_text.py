@@ -2,10 +2,10 @@ from django.http import JsonResponse
 from .models import Metadata
 from django.views.decorators.csrf import csrf_exempt
 import logging
-from main_app.pastebin_main_app.s3_handler import upload_to_s3
+from pastebin_main_app.s3_handler import upload_to_s3
 import requests
 from os import environ
-from expiry_controller import add_event
+from pastebin_main_app.expiry_controller import add_event
 
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')

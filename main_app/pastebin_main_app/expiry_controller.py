@@ -1,8 +1,6 @@
 import time
 from threading import Thread, Event
 import logging
-from .models import Metadata
-from main_app.pastebin_main_app.s3_handler import delete_from_s3
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 LOGGER = logging.getLogger(__name__)
@@ -60,6 +58,8 @@ def run_expiry_controller():
             expiry_event.clear()
 
 def delete_expired_entry(id):
+    from .models import Metadata
+    from pastebin_main_app.s3_handler import delete_from_s3
     LOGGER.info(f'Deleting expired entry with id: {id}')
     expired_entry = Metadata.objects.get(id=id)
     delete_from_s3(expired_entry.s3_key)
