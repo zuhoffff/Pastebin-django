@@ -17,8 +17,13 @@ def get_text(request, block_id):
             curr_author = metadata.author
             curr_key = metadata.s3_key
             curr_expiry=metadata.expiry_time
+            curr_pswd=metadata.password
         except metadata.DoesNotExist as e:
             return JsonResponse({f'error': 'database error  {e}'}, status=500)
+
+        # Check if paste has password set
+        if curr_pswd:
+            pass
 
         # Try to get the text from s3
         try:
