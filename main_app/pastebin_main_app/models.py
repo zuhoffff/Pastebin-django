@@ -6,6 +6,7 @@ class Metadata(models.Model):
     s3_key = models.CharField(max_length=10, unique=True, null=False)   
     key_usages = models.IntegerField(unique=False, null=False, default=0)
     author = models.CharField(max_length=30, unique=False, null=False, default='Anonymous') # Optional
+    expiry_time=models.FloatField(unique=False, null=False)
 
     def __str__(self):
         return self.timestamp

@@ -30,12 +30,13 @@ def get_hash_from_server():
         LOGGER.error(f'Error getting hash from hash-server: {e}')
         raise
 
-def save_metadata(timestamp, user_agent, s3_key, author):
+def save_metadata(timestamp, user_agent, s3_key, author, expiry_time):
     new_entry = Metadata.objects.create(
         timestamp=timestamp,
         user_agent=user_agent,
         s3_key=s3_key,
-        author=author
+        author=author,
+        expiry_time=expiry_time
     )
     new_entry.save()
     LOGGER.info('Database entry added')
@@ -50,12 +51,13 @@ def submit_text(request):
     timestamp = request.POST.get('timestamp')
     user_agent = request.POST.get('userAgent')
     author = request.POST.get('author')
-    expirationTime = request.POST.get('expirationTime')
+    # Perform conversion to float unix format (format provided by frontend: 1717338855532)
+    expiry_time = float(request.POST.get('expirationTime'))/1000
     
     # To make sure the variable is not empty string neither None
     if not author:  author='Anonymous' 
 
-    if not (text_input and timestamp and user_agent and expirationTime):
+    if not (text_input and timestamp and user_agent and expiry_time):
         return JsonResponse({'error': ERROR_MISSING_DATA}, status=400)
 
     LOGGER.info('Data received')
@@ -64,14 +66,14 @@ def submit_text(request):
         s3_key = get_hash_from_server()
         LOGGER.info(f'Obtained hash: {s3_key}')
 
-        new_entry = save_metadata(timestamp, user_agent, s3_key, author)
+        new_entry = save_metadata(timestamp, user_agent, s3_key, author, expiry_time)
         
         upload_to_s3(s3_key, text_input)
 
         curr_url = f'/block/{new_entry.id}/'
 
         # Add the pasete to expiry register
-        add_event(expiry_time=expirationTime, id=new_entry.id)
+        add_event(expiry_time=expiry_time, id=new_entry.id)
 
         return JsonResponse({'message': 'Text saved successfully', 'url': curr_url})
 
