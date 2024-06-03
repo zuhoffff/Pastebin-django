@@ -39,4 +39,4 @@ def get_text(request, block_id):
             return JsonResponse({'prompt_again': True})
     else:
         # If not a POST request, prompt for password
-        return JsonResponse({'prompt_again': True})
+        return render(request, 'password_prompt.html', {'submission_id': block_id})
