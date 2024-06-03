@@ -39,16 +39,19 @@ TODO: store s3 credentials in safer way
 ## Redis:
 - Redis stores just the most popular pastes.
 
-### Cache Design Idea:
+### My Cache Design Idea:
 - The Redis cache stores key-access pairs as a set.
 - If a key is not in the cache:
     - It is pulled from the database, and its access counter increases.
 - Flush the cache every N seconds and refill it with the M most popular keys.
 - Use two cache pools to use one as buffer.
 
-## 6. Cache:
-- Cache popular URLs.
-- Cache popular pastes.
+### Conventional Cahe Design for Read-Heavy applications:
+- Use Cache-Aside (along with Read-Through) would be an optimal caching strategy.
+
+### What to Cache:
+- Cache all the needed db fields from db (url, author, id, password).
+- Cache popular pastes (optional).
 
 ## 7. Another feature:
 User can navigate to the list of all public pastes

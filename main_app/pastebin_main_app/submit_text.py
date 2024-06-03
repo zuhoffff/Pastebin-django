@@ -7,7 +7,7 @@ from pastebin_main_app.s3_handler import upload_to_s3
 import requests
 from os import environ
 from pastebin_main_app.expiry_controller import add_event
-
+from django.core.cache import cache
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 LOGGER = logging.getLogger(__name__)
