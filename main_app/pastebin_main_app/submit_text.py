@@ -40,6 +40,9 @@ def submit_text(request):
     # Perform conversion to float unix format
     expiry_time = float(request.POST.get('expirationTime'))/1000
 
+    # Make sure author isn't None:
+    if not author: author = 'Anonymous' 
+
     if not (text_input and timestamp and user_agent and expiry_time):
         LOGGER.info(ERROR_MISSING_DATA)
         return JsonResponse({'error': ERROR_MISSING_DATA}, status=400)
