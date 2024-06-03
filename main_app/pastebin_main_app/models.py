@@ -7,7 +7,7 @@ class Metadata(models.Model):
     key_usages = models.IntegerField(unique=False, null=False, default=0)
     author = models.CharField(max_length=30, unique=False, null=False, default='Anonymous') # Optional
     expiry_time=models.FloatField(unique=False, null=False)
-    password=models.CharField(max_length=20, unique=False, null=True)
+    password=models.CharField(max_length=150, unique=False, null=True)
 
     def __str__(self):
         return self.timestamp

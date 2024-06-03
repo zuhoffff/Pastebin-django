@@ -1,39 +1,42 @@
-from django.http import JsonResponse
+from django.shortcuts import render, get_object_or_404
+from django.contrib.auth.hashers import check_password
 from .models import Metadata
-from django.views.decorators.csrf import csrf_exempt
-import logging
+from django.http import JsonResponse
+import time
 from pastebin_main_app.s3_handler import retrieve_from_s3
-from django.shortcuts import render
-from botocore.exceptions import NoCredentialsError, PartialCredentialsError, ClientError
 
-
-@csrf_exempt
 def get_text(request, block_id):
-    if request.method == 'GET':    
+    metadata = get_object_or_404(Metadata, pk=block_id)
+    curr_key = metadata.s3_key
+    curr_expiry = metadata.expiry_time
+    curr_pswd = metadata.password
 
-        # Try to get the by url tail (id) 
+    # Check if the paste has expired
+    if curr_expiry < time.time():
+        return render(request, 'expired.html')
+
+    # If the text is not protected, return it immediately
+    if not curr_pswd:
         try:
-            metadata = Metadata.objects.get(pk=block_id) # pk - primary key (id)
-            curr_author = metadata.author
-            curr_key = metadata.s3_key
-            curr_expiry=metadata.expiry_time
-            curr_pswd=metadata.password
-        except metadata.DoesNotExist as e:
-            return JsonResponse({f'error': 'database error  {e}'}, status=500)
-
-        # Check if paste has password set
-        if curr_pswd:
-            pass
-
-        # Try to get the text from s3
-        try:
-            text=retrieve_from_s3(curr_key)
-
-            return render(request, 'block.html', {'block_id': block_id, 'text': text, 'author': curr_author, 'expiry': curr_expiry})
-                
+            text = retrieve_from_s3(curr_key)
+            return render(request, 'block.html', {'block_id': block_id, 'text': text, 'author': metadata.author, 'expiry': curr_expiry})
         except Exception as e:
-            # if it isn't there, it's probably expired
             return render(request, 'expired.html')
-            
+
+    # If the text is protected, handle authentication
+    if request.method == 'POST':
+        pswrd_for_check = request.POST.get('password', '')
+        if check_password(pswrd_for_check, curr_pswd):
+            # Password is correct, set session flag
+            request.session['authenticated'] = True
+            try:
+                text = retrieve_from_s3(curr_key)
+                return render(request, 'block.html', {'block_id': block_id, 'text': text, 'author': metadata.author, 'expiry': curr_expiry})
+            except Exception as e:
+                return render(request, 'expired.html')
+        else:
+            # Incorrect password, prompt again
+            return JsonResponse({'prompt_again': True})
     else:
-        return JsonResponse({'error': 'Invalid request method'}, status=405)
+        # If not a POST request, prompt for password
+        return JsonResponse({'prompt_again': True})
