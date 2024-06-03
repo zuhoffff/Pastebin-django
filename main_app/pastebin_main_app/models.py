@@ -17,4 +17,4 @@ class Metadata(models.Model):
 
     def compose_key(self):
         # Describe the key convention here:
-        return str(self.url)+str(self.timestamp)
+        return self.url

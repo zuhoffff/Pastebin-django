@@ -29,6 +29,7 @@ User can add a block of text through the web GUI or by dropping a text file.
 
 ## 5. Storage:
 - Utilizes S3 storage to store the paste (text) itself.
+TODO: store s3 credentials in safer way
     - The convention for key to the text paste is combination of its URL and timestamp (and the password if specified).
 
 ### Hashing Server:
@@ -43,10 +44,16 @@ User can add a block of text through the web GUI or by dropping a text file.
 - If a key is not in the cache:
     - It is pulled from the database, and its access counter increases.
 - Flush the cache every N seconds and refill it with the M most popular keys.
+- Use two cache pools to use one as buffer.
 
 ## 6. Cache:
 - Cache popular URLs.
 - Cache popular pastes.
 
+## 7. Another feature:
+User can navigate to the list of all public pastes
+
 ### Other tasks:
 - organize the file structure better
+
+#### TODO: create tests.
