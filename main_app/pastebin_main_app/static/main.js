@@ -39,14 +39,9 @@ document.getElementById('textForm').addEventListener('submit', function(event) {
     formData.append('expirationTime', expirationTime.getTime());
     formData.append('timestamp', timestamp.getTime());
     formData.append('userAgent', userAgent);
+    if (authorInput){formData.append('author', authorInput);}
+    if (passwordInput){formData.append('password', passwordInput);}
     
-    if (authorInput){
-        formData.append('authorInput', authorInput);
-    }
-    if (passwordInput){ 
-        formData.append('passwordInput', passwordInput);
-    }
-
     // Send POST request with form data
     fetch('/submit-text/', {
         method: 'POST',

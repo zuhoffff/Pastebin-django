@@ -1,3 +1,4 @@
+from django.contrib.auth.hashers import make_password
 from django.http import JsonResponse
 from .models import Metadata
 from django.views.decorators.csrf import csrf_exempt
@@ -32,22 +33,37 @@ def submit_text(request):
         return JsonResponse({'error': ERROR_INVALID_METHOD}, status=405)
     
     # Returns None for optional field not specified
-    text_input = request.POST.get('text')
-    timestamp = request.POST.get('timestamp')
-    user_agent = request.POST.get('userAgent')
-    author = request.POST.get('author')
-    password = request.POST.get('password')
+    raw_data = request.body.decode('utf-8')
+    LOGGER.info("Received form data: %s", raw_data)
+        
+    # Parse the form data
+    form_data = request.POST
+    
+    # Retrieve individual fields from the form data
+    text_input = form_data.get('text')
+    timestamp = form_data.get('timestamp')
+    user_agent = form_data.get('userAgent')
+    author = form_data.get('author')
+    password = form_data.get('password')
     # Perform conversion to float unix format
-    expiry_time = float(request.POST.get('expirationTime'))/1000
+    expiry_time = float(form_data.get('expirationTime'))/1000
 
     # Make sure author isn't None:
-    if not author: author = 'Anonymous' 
+    if not author: author = 'Anonymous'
+
+    # Hash the password if its provided
+    if password:
+        hashed_password = make_password(password)
+    else:
+        hashed_password = None
 
     if not (text_input and timestamp and user_agent and expiry_time):
         LOGGER.info(ERROR_MISSING_DATA)
         return JsonResponse({'error': ERROR_MISSING_DATA}, status=400)
+    
 
-    # Get hash from the hash-server
+
+    # Get hash for url from the hash-server
     try:
         s3_key = get_hash_from_server()
     except requests.RequestException as e:
@@ -62,7 +78,8 @@ def submit_text(request):
         expiry_time=expiry_time,
         # Optional:
         author=author,
-        password=password
+        # Use the encrypted password
+        password=hashed_password
     )
     new_entry.save()
 
