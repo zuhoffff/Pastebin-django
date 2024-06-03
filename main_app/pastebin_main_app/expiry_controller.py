@@ -68,7 +68,7 @@ def delete_expired_entry(id):
     from pastebin_main_app.s3_handler import delete_from_s3
     LOGGER.info(f'Deleting expired entry with id: {id}')
     expired_entry = Metadata.objects.get(id=id)
-    delete_from_s3(expired_entry.s3_key)
+    delete_from_s3(expired_entry.url)
     LOGGER.info('Expired entry deleted.')
 
 def start_expiry_controller():

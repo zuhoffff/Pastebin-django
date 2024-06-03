@@ -65,7 +65,7 @@ def submit_text(request):
 
     # Get hash for url from the hash-server
     try:
-        s3_key = get_hash_from_server()
+        new_hash = get_hash_from_server()
     except requests.RequestException as e:
         LOGGER.error(f'{ERROR_HASH_SERVER},{e}')
         return JsonResponse({'error': ERROR_HASH_SERVER}, status=400)
@@ -74,7 +74,7 @@ def submit_text(request):
     new_entry = Metadata.objects.create(
         timestamp=timestamp,
         user_agent=user_agent,
-        s3_key=s3_key,
+        url=new_hash,
         expiry_time=expiry_time,
         # Optional:
         author=author,
@@ -84,13 +84,16 @@ def submit_text(request):
     new_entry.save()
 
     # Create url for new paste
-    curr_url = f'/block/{new_entry.id}/'
+    curr_url = f'/block/{new_entry.url}/'
+
+    # Create s3_key do to convention:
+    s3_key = new_entry.compose_key()
 
     # Upload data to s3 blobstore
     try:
         upload_to_s3(s3_key, text_input)
 
-        # Add the pasete to expiry registry
+        # Add the paste to expiry registry
         add_event(expiry_time=expiry_time, id=new_entry.id)
 
         return JsonResponse({'message': 'Text saved successfully', 'url': curr_url})

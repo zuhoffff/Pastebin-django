@@ -5,11 +5,13 @@ from django.http import JsonResponse
 import time
 from pastebin_main_app.s3_handler import retrieve_from_s3
 
-def get_text(request, block_id):
-    metadata = get_object_or_404(Metadata, pk=block_id)
-    curr_key = metadata.s3_key
+def get_text(request, url):
+    metadata = get_object_or_404(Metadata, url=url)
+    curr_id=metadata.id
     curr_expiry = metadata.expiry_time
     curr_pswd = metadata.password
+    curr_author=metadata.author
+    curr_key = metadata.compose_key()
 
     # Check if the paste has expired
     if curr_expiry < time.time():
@@ -19,7 +21,7 @@ def get_text(request, block_id):
     if not curr_pswd:
         try:
             text = retrieve_from_s3(curr_key)
-            return render(request, 'block.html', {'block_id': block_id, 'text': text, 'author': metadata.author, 'expiry': curr_expiry})
+            return render(request, 'block.html', {'block_id': curr_id, 'text': text, 'author': curr_author, 'expiry': curr_expiry})
         except Exception as e:
             return render(request, 'expired.html')
 
@@ -31,7 +33,7 @@ def get_text(request, block_id):
             request.session['authenticated'] = True
             try:
                 text = retrieve_from_s3(curr_key)
-                return render(request, 'block.html', {'block_id': block_id, 'text': text, 'author': metadata.author, 'expiry': curr_expiry})
+                return render(request, 'block.html', {'block_id': curr_id, 'text': text, 'author': curr_author, 'expiry': curr_expiry})
             except Exception as e:
                 return render(request, 'expired.html')
         else:
@@ -39,4 +41,4 @@ def get_text(request, block_id):
             return JsonResponse({'prompt_again': True})
     else:
         # If not a POST request, prompt for password
-        return render(request, 'password_prompt.html', {'submission_id': block_id})
+        return render(request, 'password_prompt.html', {'submission_id': url})
