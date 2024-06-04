@@ -30,11 +30,15 @@ User can add a block of text through the web GUI or by dropping a text file.
 ## 5. Storage:
 - Utilizes S3 storage to store the paste (text) itself.
 TODO: store s3 credentials in safer way
-    - The convention for key to the text paste is combination of its URL and timestamp (and the password if specified).
+    - The example convention for key to the text paste: combination of its URL and timestamp (and the password if specified).
 
 ### Hashing Server:
 - Unique URLs generation.
 - Implementation of multithreading (Todo).
+Design ideas:
+1. add new hash to db every time its used
+2. check for the amount of spare hashes every N time
+3. restore number of spare hashes everytime server is free of requests (if they arrive continuously, check handle cases when get_hash has no hash to return).
 
 ## Redis:
 - Redis stores just the most popular pastes.
