@@ -12,8 +12,9 @@ LOGGER = logging.getLogger(__name__)
 
 def get_text(request, url):
     # Check if object on the cache
-    if cache.get(url):
-        current_data = cache.get(url)
+    current_data = cache.get(url)
+
+    if current_data:
         LOGGER.info('hit cache')
     else:
         metadata = get_object_or_404(Metadata, url=url)
@@ -38,7 +39,7 @@ def get_text(request, url):
         try:
             # Adjust the json to send it to the page
             current_data['text'] = retrieve_from_s3(current_data['key'])
-            current_data.pop('password')
+
             return render(request, 'block.html', current_data)
         except Exception as e:
             return render(request, 'expired.html')
@@ -47,7 +48,7 @@ def get_text(request, url):
     else:
         if request.method == 'POST':
             pswrd_for_check = request.POST.get('password', '')
-            if check_password(pswrd_for_check, current_data):
+            if check_password(pswrd_for_check, current_data['password']):
                 # Password is correct, set session flag
                 request.session['authenticated'] = True
                 try:
