@@ -17,7 +17,7 @@ db_name = environ.get('POSTGRES_DB')
 DB_URL = (f'postgresql://{db_user}:{db_pass}@{db_host}/{db_name}')
 
 # Specify configuration constants 
-HASH_POOL = 10
+HASH_POOL = 100
 CHECK_PERIOD = 1
 
 # SQLAlchemy setup
@@ -60,7 +60,7 @@ def count_unused_hashes():
         return count
 
 # Ensure a certain number of spare hashes
-def ensure_spare_hashes(n):
+def ensure_spare_hashes(n=100):
     logger.info(f'Ensuring at least {n} spare hashes.')
     current_unused = count_unused_hashes()
     while current_unused < n:
@@ -70,15 +70,23 @@ def ensure_spare_hashes(n):
 # Get the next unused hash
 def get_next_unused_hash():
     with Session() as session:
-        hash_entry = session.query(Hash).filter_by(used=False).order_by(Hash.id).first()
-        if hash_entry:
-            hash_entry.used = True
-            session.commit()
-            logger.info(f'Retrieved unused hash: {hash_entry.hash}')
+        try:
+            hash_entry = session.query(Hash).filter_by(used=False).order_by(Hash.id).first()
+            if hash_entry:
+                hash_entry.used = True
+                session.commit()
+                logger.info(f'Retrieved unused hash: {hash_entry.hash}')
+                return hash_entry.hash
+            # Ran out of hashes due to high activity, restore them:
+            insert_new_hash()   
+            hash_entry = session.query(Hash).filter_by(used=False).order_by(Hash.id).first()
             return hash_entry.hash
-        logger.warning('No unused hashes available.')
-        return None
-
+        
+        except Exception as e:
+            session.rollback()
+            logger.error(f'Error retrieving unused hash: {e}')
+            return None
+        
 # Main function for initialization
 def main():
     setup_database()
