@@ -14,6 +14,7 @@ class ExpiryController:
         Class that performs expiry monitoring based on unix float time and object id,
         
         Args:
+            delete_expired_entry (Callable): function that will perform the deletion logic for expired object, based on an id
 
         Dependencies:
             insert_to_sorted_list_returning_position()

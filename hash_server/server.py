@@ -2,9 +2,10 @@ import json
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from socketserver import ThreadingMixIn
 from os import environ
-from hash_generator import ensure_spare_hashes, get_next_unused_hash, main as hash_gen_main
 import logging
 import threading, time
+from hash_generator import HashGenerator
+from hashDbWizard import HashDbWizard
 
 # TODO: remake into class
 
@@ -39,7 +40,7 @@ class handler(BaseHTTPRequestHandler):
         self.end_headers()
 
         try:
-            hash_key = get_next_unused_hash()
+            hash_key = HashGenerator.get_next_unused_hash()
             LOGGER.info(f'Returned hash: {hash_key}')
             response = json.dumps({'hash': hash_key}).encode()
         except Exception as e:
@@ -50,7 +51,9 @@ class handler(BaseHTTPRequestHandler):
 
 def main():
     # Initialize the hash generator which works continuously
-    hash_gen_main()
+    newDbWizard = newDbWizard()
+    hashGenerator = HashGenerator(newDbWizard)
+    hashGenerator.ensure_spare_hashes()
 
     HOST = environ.get('HOST', default='0.0.0.0')
     PORT = int(environ.get('PORT', default=8000))
@@ -59,14 +62,13 @@ def main():
     server = CustomThreadingHTTPServer(server_address, handler)
     LOGGER.info(f'Server is running on: {server_address}')
 
-    def monitor_server_activity():
+    def check_for_requests():
         if server.active_threads == 0:
-            ensure_spare_hashes()
-        time.sleep(5)
+            hashGenerator.ensure_spare_hashes()
     
     # Create separate thread for activity monitoring:
-    monitorThread = threading.Thread(target=monitor_server_activity, args=())
-    monitorThread.run()
+    monitorThread = threading.Thread(target=check_for_requests, args=())
+    monitorThread.start()
 
     server.serve_forever()
 

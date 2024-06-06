@@ -59,7 +59,7 @@ def submit_text(request):
         hashed_password = None
 
     if not (text_input and timestamp and user_agent and expiry_time):
-        LOGGER.info(ERROR_MISSING_DATA)
+        LOGGER.error(ERROR_MISSING_DATA)
         return JsonResponse({'error': ERROR_MISSING_DATA}, status=400)
     
 
@@ -96,7 +96,7 @@ def submit_text(request):
 
         # Add the paste to expiry registry
         newExpiryController.add_event(expiry_time=expiry_time, id=new_entry.id)
-        LOGGER.info('Entry added to expiry controller...')
+        LOGGER.info('Entry added to expiry controller')
 
         return JsonResponse({'message': 'Text saved successfully', 'url': curr_url})
     
