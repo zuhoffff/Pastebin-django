@@ -6,8 +6,7 @@ import logging
 from pastebin_main_app.s3_handler import upload_to_s3
 import requests
 from os import environ
-from pastebin_main_app.expiry_controller import add_event
-import pastebin_main_app.apps as newExpiryController
+from pastebin_main_app.apps import newExpiryController
 
 # TODO: remake into oop if sufficient
 
