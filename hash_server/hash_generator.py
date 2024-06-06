@@ -5,6 +5,8 @@ from sqlalchemy import create_engine, Column, Integer, String, Boolean, func
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
+#TODO: remake into class:
+
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

@@ -64,3 +64,4 @@ User can navigate to the list of all public pastes
 - organize the file structure better
 
 #### TODO: create tests.
+#### TODO: make logging integrated into whole project
