@@ -34,31 +34,30 @@ def get_text(request, url):
     if current_data['expiry'] < time.time():
         return render(request, 'expired.html')
 
+    # Adjust the json to send it to the page
+    current_data['text'] = retrieve_from_s3(current_data['key'])
+
     # If the text is not protected, return it immediately
     if not current_data['password']:
         try:
-            # Adjust the json to send it to the page
-            current_data['text'] = retrieve_from_s3(current_data['key'])
-
             return render(request, 'block.html', current_data)
         except Exception as e:
             return render(request, 'expired.html')
     
     # If the text is protected, handle authentication
     else:
-        if request.method == 'POST':
+        if not request.method == 'POST':
+            # If not a POST request, prompt for password
+            return render(request, 'password_prompt.html', {'submission_id': url})
+        else:
             pswrd_for_check = request.POST.get('password', '')
             if check_password(pswrd_for_check, current_data['password']):
                 # Password is correct, set session flag
                 request.session['authenticated'] = True
                 try:
-                    current_data['text'] = retrieve_from_s3(current_data['key'])
                     return render(request, 'block.html', current_data)
                 except Exception as e:
                     return render(request, 'expired.html')
             else:
                 # Incorrect password, prompt again
                 return JsonResponse({'prompt_again': True})
-        else:
-            # If not a POST request, prompt for password
-            return render(request, 'password_prompt.html', {'submission_id': url})
