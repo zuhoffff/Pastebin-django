@@ -7,7 +7,9 @@ from pastebin_main_app.s3_handler import upload_to_s3
 import requests
 from os import environ
 from pastebin_main_app.expiry_controller import add_event
-from django.core.cache import cache
+import pastebin_main_app.apps as newExpiryController
+
+# TODO: remake into oop if sufficient
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 LOGGER = logging.getLogger(__name__)
@@ -94,7 +96,8 @@ def submit_text(request):
         upload_to_s3(s3_key, text_input)
 
         # Add the paste to expiry registry
-        add_event(expiry_time=expiry_time, id=new_entry.id)
+        newExpiryController.add_event(expiry_time=expiry_time, id=new_entry.id)
+        LOGGER.info('Entry added to expiry controller...')
 
         return JsonResponse({'message': 'Text saved successfully', 'url': curr_url})
     

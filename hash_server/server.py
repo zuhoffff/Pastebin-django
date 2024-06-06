@@ -6,6 +6,8 @@ from hash_generator import ensure_spare_hashes, get_next_unused_hash, main as ha
 import logging
 import threading, time
 
+# TODO: remake into class
+
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 LOGGER = logging.getLogger(__name__)
 

@@ -7,6 +7,8 @@ from pastebin_main_app.s3_handler import retrieve_from_s3
 from django.core.cache import cache
 import logging
 
+# TODO: remake into oop if sufficient
+
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 LOGGER = logging.getLogger(__name__)
 
