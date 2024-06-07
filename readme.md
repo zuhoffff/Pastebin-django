@@ -64,5 +64,5 @@ User can navigate to the list of all public pastes
 - organize the file structure better
 
 #### TODO: create tests.
-#### TODO: make logging integrated into whole project
+#### TODO: make logging integral for whole project
 #### TODO: make config file for the AWS to not store credentials in public repo!

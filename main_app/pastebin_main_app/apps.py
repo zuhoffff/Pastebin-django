@@ -1,9 +1,9 @@
 from django.apps import AppConfig
 from threading import Thread
-from pastebin_main_app.myUtilFunctions import delete_expired_entry
+from pastebin_main_app.myUtilFunctions import delete_expired_entry_by_id
 from .expiry_controller import ExpiryController 
 
-newExpiryController = ExpiryController(delete_expired_entry)
+newExpiryController = ExpiryController(delete_expired_entry_by_id)
 
 class PastebinMainAppConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
