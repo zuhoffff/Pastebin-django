@@ -1,6 +1,6 @@
 import time
 from threading import Thread, Event
-from pastebin_main_app.myUtilFunctions import insert_to_sorted_list_returning_position
+from main_app.pastebin_main_app.utils.myUtilFunctions import insert_to_sorted_list_returning_position
 from typing import Callable
 import logging
 

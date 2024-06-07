@@ -1,7 +1,7 @@
 from django.urls import path
 from .views import home
-from .submit_text import submit_text
-from .get_text import get_text
+from .submit_text.submit_text import submit_text
+from .get_text.get_text import get_text
 
 urlpatterns = [
     path("", home, name='home'),

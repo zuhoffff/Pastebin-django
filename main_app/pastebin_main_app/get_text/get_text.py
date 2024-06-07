@@ -1,9 +1,9 @@
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.hashers import check_password
-from .models import Metadata
+from ..models import Metadata
 from django.http import JsonResponse
 import time
-from pastebin_main_app.s3_handler import retrieve_from_s3
+from main_app.pastebin_main_app.utils.s3_handler import retrieve_from_s3
 from django.core.cache import cache
 import logging
 
