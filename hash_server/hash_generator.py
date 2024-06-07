@@ -9,7 +9,6 @@ class HashGenerator:
         self.spare_hashes_plank = number_of_spare_hashes
         self.spare_hash_check_period = spare_hash_check_period
         self.hash_db_wizard = db_wizard
-        logger.info('hash generator instance crated')
 
     # Ensure a certain number of spare hashes
     def ensure_spare_hashes(self):
