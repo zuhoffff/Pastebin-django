@@ -3,9 +3,10 @@ from http.server import HTTPServer, BaseHTTPRequestHandler
 from socketserver import ThreadingMixIn
 from os import environ
 import logging
-import threading, time
+import threading
 from hash_generator import HashGenerator
 from hashDbWizard import HashDbWizard
+from setup_db import Hashes, engine
 
 # TODO: remake into class
 
@@ -51,7 +52,7 @@ class handler(BaseHTTPRequestHandler):
 
 def main():
     # Initialize the hash generator which works continuously
-    newDbWizard = newDbWizard()
+    newDbWizard = HashDbWizard(engine=engine, db_model=Hashes)
     hashGenerator = HashGenerator(newDbWizard)
     hashGenerator.ensure_spare_hashes()
 
