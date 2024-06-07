@@ -32,7 +32,7 @@ class CustomThreadingMixIn(ThreadingMixIn):
 class CustomThreadingHTTPServer(CustomThreadingMixIn, HTTPServer):
     """Handle requests in a separate thread."""
 
-class myHandler(BaseHTTPRequestHandler):
+class Handler(BaseHTTPRequestHandler):
     def __init__(self, localHashGenerator: HashGenerator, *args, **kwargs):
         self.localHashGenerator = localHashGenerator
         super().__init__(*args, **kwargs)
@@ -53,39 +53,61 @@ class myHandler(BaseHTTPRequestHandler):
 
         self.wfile.write(response)
 
-# Handler Factory:
-def create_handler(hash_generator):
-    class CustomHandler(myHandler):
-        def __init__(self, *args, **kwargs):
-            super().__init__(hash_generator, *args, **kwargs)
-    return CustomHandler
+class HandlerFactory:
+    @staticmethod
+    def create_handler(InjectedClass):
+        class CustomHandler(Handler):
+            def __init__(self, *args, **kwargs):
+                super().__init__(InjectedClass, *args, **kwargs)
+        return CustomHandler
+
+class HashServer:
+    def __init__(self, server_address: tuple, hash_generator, time_to_check: int, ) -> None:
+        self.address = server_address
+        self.hash_generator = hash_generator
+        self.time_to_check = time_to_check
+        self.server = None
+
+    def initialize_hash_server(self, custom_server):
+        self.server = custom_server
+
+    def _check_for_requests(self):
+        if self.server.active_threads == 0:
+            self.hash_generator.ensure_spare_hashes()
+            time.sleep(self.time_to_check)
+
+    def _create_spare_hashes_provider_thread(self):
+         # Create separate thread for activity monitoring:
+        provider_thread = threading.Thread(target=self._check_for_requests, args=(), daemon=True)
+        return provider_thread
+
+    def _handle_background_tasks(self):
+        self._create_spare_hashes_provider_thread().start()
+
+    def start_hash_server(self):
+        self._handle_background_tasks()
+        self.server.serve_forever()
 
 def main():
-        
-    # Initialize the hash generator which works continuously
+    # Initialize the hash generator
     newDbWizard = HashDbWizard(engine=engine, db_model=Hashes)
     newHashGenerator = HashGenerator(newDbWizard)
+    # Refill db with hashes just in case
     newHashGenerator.ensure_spare_hashes()
+
     HOST = environ.get('HOST', default='0.0.0.0')
-    logger.info(HOST)
     PORT = int(environ.get('PORT', default=8000))
-    logger.info(PORT)
-
     server_address = (HOST, PORT)
-    handlerClass = create_handler(newHashGenerator)
-    server = CustomThreadingHTTPServer(server_address, handlerClass)
-    logger.info(f'Server is running on: {server_address}')
 
-    def check_for_requests():
-        if server.active_threads == 0:
-            newHashGenerator.ensure_spare_hashes()
-            time.sleep(5)
+    handlerClass = HandlerFactory().create_handler(newHashGenerator)
+
+    myHashServer = HashServer(server_address=server_address,
+                              hash_generator=newHashGenerator,
+                              time_to_check=5)
     
-    # Create separate thread for activity monitoring:
-    monitorThread = threading.Thread(target=check_for_requests, args=())
-    monitorThread.start()
-
-    server.serve_forever()
+    myServer = CustomThreadingHTTPServer(server_address, handlerClass)
+    myHashServer.initialize_hash_server(myServer)
+    myHashServer.start_hash_server()
 
 if __name__ == '__main__':
     main()
