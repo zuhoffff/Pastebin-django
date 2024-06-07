@@ -3,7 +3,7 @@ from sqlalchemy import func
 from sqlalchemy.orm import sessionmaker
 import base64
 from abc import ABC, abstractmethod
-from typing import override
+from logger import logger
 
 class AbstractHashDbWizard(ABC):
     @abstractmethod
@@ -12,8 +12,9 @@ class AbstractHashDbWizard(ABC):
         self.db_model = db_model
     
     # Generate a new hash based on the id
+    @staticmethod
     @abstractmethod
-    def __generate_hash():
+    def generate_hash(id):
         pass
         
     @abstractmethod
@@ -28,23 +29,22 @@ class AbstractHashDbWizard(ABC):
     def get_next_unused_hash(self):
         pass
 
-
-
 class HashDbWizard(AbstractHashDbWizard):
     
     def __init__(self, engine, db_model) -> None:
         super().__init__(engine, db_model)
-    
-    @override
-    def __generate_hash(id):
+        logger.info('wizard instance craeted')
+
+    @staticmethod
+    def generate_hash(id):
         return base64.b64encode(str(id).encode()).decode()
-    
-    @override
+  
     def insert_new_hashes(self, amount) -> None:
         with self.Session() as session:
             for i in range(amount):
                 last_id = session.query(func.max(self.db_model.id)).scalar() or 0
-                new_hash = self.__generate_hash(last_id + 1)
+                curr_id = last_id+1
+                new_hash = self.generate_hash(curr_id)
                 hash_entry = self.db_model(hash=new_hash)
                 session.add(hash_entry)
                 session.commit()
@@ -60,4 +60,5 @@ class HashDbWizard(AbstractHashDbWizard):
         with self.Session() as session:
             next_hash_entry = session.query(self.db_model).filter_by(used=False).first() 
             next_hash_entry.used = True
+            session.commit()
             return next_hash_entry.hash
