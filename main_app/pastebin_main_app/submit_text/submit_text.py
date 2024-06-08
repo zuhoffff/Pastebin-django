@@ -1,5 +1,5 @@
 from django.contrib.auth.hashers import make_password
-from django.http import JsonResponse
+from django.http import HttpResponse, JsonResponse
 from ..models import Metadata
 from django.views.decorators.csrf import csrf_exempt
 import logging
@@ -7,7 +7,6 @@ from main_app.pastebin_main_app.utils.s3_handler import upload_to_s3
 import requests
 from os import environ
 from pastebin_main_app.apps import newExpiryController
-from django import forms
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 LOGGER = logging.getLogger(__name__)
@@ -22,17 +21,11 @@ ERROR_GENERIC = 'An error occurred'
 ERROR_MISSING_DATA = 'Missing frontend data'
 ERROR_INVALID_METHOD = 'Invalid request method'
 
-class SubmitTextService():
-    def __init__(self, request) -> None:
-        pass
-
-    def get_hash_from_server():
-        response = requests.get(HASH_SERVER_URI)
-        response.raise_for_status()
-        return response.json().get('hash')
+def get_hash_from_server():
+    response = requests.get(HASH_SERVER_URI)
+    response.raise_for_status()
+    return response.json().get('hash')
     
-
-
 @csrf_exempt
 def submit_text(request):
     if request.method != 'POST':
@@ -55,6 +48,7 @@ def submit_text(request):
     expiry_time = float(form_data.get('expirationTime'))/1000
 
     # Make sure author isn't None:
+    
     if not author: author = 'Anonymous'
 
     # Hash the password if its provided
