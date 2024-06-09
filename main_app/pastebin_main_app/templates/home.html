@@ -1,45 +1,44 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Text Submission</title>
-    {% load static %}
-    <link rel="stylesheet" href="{% static 'home.css' %}">
-    <link rel="stylesheet" href="{% static 'timer.css' %}">
+    <title>Submit Text</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
-    <h1>Submit Text</h1>
-    <form id="textForm" action="/submit-text/" method="post">
-        <label for="textInput">Enter text:</label>
-        <input type="text" id="textInput" name="textInput" required>
-        
-        <label for="authorInput">Author (optional):</label>
-        <input type="text" id="authorInput" name="authorInput" pattern="[a-zA-Z0-9_@-]*" title="Author name can only contain letters, numbers, and _ @ -">
-
-        <label for="expiration">Expiration Time:</label>
-        <div id="timer" class="timer">
-                <!-- Days -->
-            <div id="days" class="column">
-            </div>
-                <!-- Hours -->
-            <div id="hours" class="column">
-            </div>
-                <!-- Minutes -->
-            <div id="minutes" class="column">
-            </div>
-        </div>
-
-        <!-- Password Field -->
-        <label for="passwordInput">Enter password (optional):</label>
-        <input type="password" id="passwordInput" name="passwordInput">
-
+    <h1>Submit Your Text</h1>
+    <form id="submit-text-form" method="POST">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <input type="text" name="timestamp" id="timestamp" hidden>
+        <input type="text" name="userAgent" id="userAgent" hidden>
         <button type="submit">Submit</button>
     </form>
+    <div id="response"></div>
 
-    <p id="responseMessage"></p>
-    <p id="responseUrl"></p>
+    <script>
+        // Automatically fill the timestamp and user agent fields
+        document.getElementById('timestamp').value = Date.now();
+        document.getElementById('userAgent').value = navigator.userAgent;
 
-    <script src="{% static 'main.js' %}"></script>
+        $(document).ready(function() {
+            $('#submit-text-form').on('submit', function(event) {
+                event.preventDefault();
+                $.ajax({
+                    url: "{% url 'submit_text' %}",
+                    type: "POST",
+                    data: $(this).serialize(),
+                    success: function(response) {
+                        $('#response').html('<p>' + response.message + '</p>');
+                        if (response.url) {
+                            $('#response').append('<a href="' + response.url + '">View your submission</a>');
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        $('#response').html('<p>An error occurred: ' + xhr.responseJSON.error + '</p>');
+                    }
+                });
+            });
+        });
+    </script>
 </body>
 </html>

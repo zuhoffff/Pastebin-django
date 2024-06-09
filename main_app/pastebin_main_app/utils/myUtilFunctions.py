@@ -23,6 +23,6 @@ def insert_to_sorted_list_returning_position(lst, value):
 
 def delete_expired_entry_by_id(id):
     from ..models import Metadata
-    from main_app.pastebin_main_app.utils.s3_handler import delete_from_s3
+    from pastebin_main_app.utils.s3_handler import myS3Service
     expired_entry = Metadata.objects.get(id=id)
-    delete_from_s3(expired_entry.url)
+    myS3Service.delete_from_s3(expired_entry.url)
