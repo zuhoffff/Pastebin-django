@@ -3,9 +3,9 @@ from django.contrib.auth.hashers import check_password
 from ..models import Metadata
 from django.http import JsonResponse
 import time
-from main_app.pastebin_main_app.utils.s3_handler import retrieve_from_s3
 from django.core.cache import cache
 import logging
+from pastebin_main_app.utils.s3_handler import myS3Service
 
 # TODO: remake into oop if sufficient
 
@@ -37,7 +37,7 @@ def get_text(request, url):
         return render(request, 'expired.html')
 
     # Adjust the json to send it to the page
-    current_data['text'] = retrieve_from_s3(current_data['key'])
+    current_data['text'] = myS3Service.retrieve_from_s3(current_data['key'])
 
     # If the text is not protected, return it immediately
     if not current_data['password']:

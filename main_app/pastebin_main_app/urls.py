@@ -1,10 +1,8 @@
 from django.urls import path
-from .views import home
-from .submit_text.submit_text import submit_text
 from .get_text.get_text import get_text
+from .views import SubmitTextView, HomeView
 
 urlpatterns = [
-    path("", home, name='home'),
-    path('submit-text/', submit_text, name='submit_text'),
-    path('block/<str:url>/',get_text, name='get_text')
+    path('', HomeView.as_view(), name='home'),
+    path('submit-text/', SubmitTextView.as_view(), name='submit_text'),
 ]
