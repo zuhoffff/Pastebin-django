@@ -9,7 +9,6 @@ class PastebinMainAppConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
     name = 'pastebin_main_app'
 
-    def ready(self):        
-        # TODO: make sure this is valid approach (the only solution I came up with so far)
+    def ready(self):
         expiry_controller_thread = Thread(target=newExpiryController.run_expiry_controller, args=())
         expiry_controller_thread.start()
