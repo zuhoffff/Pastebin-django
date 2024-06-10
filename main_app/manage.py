@@ -7,11 +7,9 @@ import sys
 def main():
     """Run administrative tasks."""
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'pastebin.settings')
-
     
-    import ptvsd
-    ptvsd.enable_attach(address=(‘0.0.0.0’, 5678), redirect_output=True)
-
+    # import ptvsd
+    # ptvsd.enable_attach(address=(‘0.0.0.0’, 5678), redirect_output=True)
         
     try:
         from django.core.management import execute_from_command_line

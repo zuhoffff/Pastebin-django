@@ -7,20 +7,13 @@ class PasteSubmissionForm(forms.ModelForm):
     text = forms.CharField(max_length=10000, required=True)
     password = forms.CharField(max_length=150, required=True)
 
-    paste_duration = forms.DurationField(
-        initial=timezone.timedelta(days=2),
+    expiry_time = forms.DateTimeField(
+        input_formats=['%Y-%m-%dT%H:%M:%SZ'],
         widget=forms.TextInput(attrs={
-            'placeholder':'2 days 0 hours 0 minutes',
+            'placeholder': '2024-06-12T13:27:49Z',
             'class': 'flatpickr'
-
         })
     )
-    
-    def clean_paste_duration(self):
-        expiry_time = self.cleaned_data['paste_duration']
-        if expiry_time.total_seconds() <= 0:
-            raise forms.ValidationError("Expiry time must be in the future.")
-        return expiry_time
 
     class Meta:
         model = Metadata

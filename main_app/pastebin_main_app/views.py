@@ -2,7 +2,7 @@ from django.shortcuts import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic.edit import CreateView
 # from django.views.generic import TemplateView
-from pastebin_main_app.submit_text.submition_form import PasteSubmissionForm
+from .submit_text.submition_form import PasteSubmissionForm
 from django.contrib.auth.hashers import make_password
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -89,6 +89,7 @@ class SubmitTextView(CreateView):
         # return JsonResponse({'message': 'Text saved successfully', 'url': full_url})
     
     def form_invalid(self, form):
+        logger.error('the form is invalid')
         response_data = {
             'success': False,
             'error': 'Invalid form data',
