@@ -1,41 +1,71 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Submit Text</title>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paste Submission Form</title>
+
+    <!-- Include flatpickr CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 </head>
 <body>
-    <h1>Submit Your Text</h1>
-    <form id="submit-text-form" method="POST">
+    <form id="pasteSubmissionForm" method="post" action="">
         {% csrf_token %}
         {{ form.as_p }}
-        <input type="text" name="timestamp" id="timestamp" hidden>
-        <input type="text" name="userAgent" id="userAgent" hidden>
         <button type="submit">Submit</button>
     </form>
-    <div id="response"></div>
 
+    <div id="response">
+        <p id="responseMessage"></p>
+        <div id="responseUrl"></div>
+    </div>
+
+    <!-- Include flatpickr JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+    <!-- JavaScript code for flatpickr initialization -->
     <script>
-        // Automatically fill the timestamp and user agent fields
-        document.getElementById('timestamp').value = Date.now();
-        document.getElementById('userAgent').value = navigator.userAgent;
+        document.addEventListener("DOMContentLoaded", function() {
+            // Calculate the date 2 days from now
+            const twoDaysFromNow = new Date();
+            twoDaysFromNow.setDate(twoDaysFromNow.getDate() + 2);
 
-        $(document).ready(function() {
-            $('#submit-text-form').on('submit', function(event) {
-                event.preventDefault();
-                $.ajax({
-                    url: "{% url 'submit_text' %}",
-                    type: "POST",
-                    data: $(this).serialize(),
-                    success: function(response) {
-                        $('#response').html('<p>' + response.message + '</p>');
-                        if (response.url) {
-                            $('#response').append('<a href="' + response.url + '">View your submission</a>');
-                        }
-                    },
-                    error: function(xhr, status, error) {
-                        $('#response').html('<p>An error occurred: ' + xhr.responseJSON.error + '</p>');
+            flatpickr(".flatpickr", {
+                enableTime: true,
+                dateFormat: "Z",
+                time_24hr: true,
+                minuteIncrement: 1,
+                defaultDate: twoDaysFromNow,
+                minDate: "today",
+                altInput: true,
+                altFormat: "F j, Y H:i",
+                allowInput: true
+            });
+
+            // Handle form submission
+            document.getElementById("pasteSubmissionForm").addEventListener("submit", function(event) {
+                event.preventDefault(); // Prevent default form submission
+
+                const form = event.target;
+                const formData = new FormData(form);
+
+                // Submit form data using Fetch API
+                fetch(form.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRFToken': formData.get('csrfmiddlewaretoken')
                     }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Process the response data
+                    document.getElementById('responseMessage').textContent = 'Success: ' + data.message;
+                    const url = window.location.origin + data.url;
+                    document.getElementById('responseUrl').innerHTML = `<a href="${url}" target="_blank">${url}</a>`;
+                })
+                .catch(error => {
+                    document.getElementById('responseMessage').textContent = 'Error: ' + error;
                 });
             });
         });

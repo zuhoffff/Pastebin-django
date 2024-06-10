@@ -38,7 +38,14 @@ class SubmitTextService():
         return float(time_til_expiry.timestamp())
     
     @staticmethod
+    def convert_timedelta_to_unix(timedelta_obj):
+        epoch = datetime.utcfromtimestamp(0)
+        return int((epoch + timedelta_obj).timestamp())
+
+    @staticmethod
     def convert_iso_to_unix(time_iso8601):
         parsed_t = dp.parse(time_iso8601)
         t_in_seconds = parsed_t.timestamp()
         return float(t_in_seconds)
+    
+submitTextService = SubmitTextService(HASH_SERVER_URI)
