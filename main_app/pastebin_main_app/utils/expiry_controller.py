@@ -67,3 +67,6 @@ class ExpiryController:
             else:
                 self.expiry_event.wait(timeout=time_til_next_expiry)
                 self.expiry_event.clear()       
+
+from .myUtilFunctions import delete_expired_entry_by_id
+myExpController = ExpiryController(delete_expired_entry_by_id)
