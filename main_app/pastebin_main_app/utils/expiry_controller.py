@@ -1,4 +1,4 @@
-import time
+from datetime import datetime
 from threading import Thread, Event
 from pastebin_main_app.utils.myUtilFunctions import insert_to_sorted_list_returning_position
 from typing import Callable
@@ -54,7 +54,8 @@ class ExpiryController:
                 self.expiry_event.clear()
                 continue
 
-            current_time = time.time()
+            # Use UTC int TIMESTAMP 
+            current_time = int(datetime.now())
 
             # Make sure both are float:
             time_til_next_expiry = self.expiry_registry[0][0] - current_time

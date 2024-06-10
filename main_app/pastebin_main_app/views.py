@@ -41,10 +41,15 @@ class SubmitTextView(CreateView):
         text = form_data.get('text')
         expiry_time = form_data.get('expiry_time')
         password = form_data.get('password')
+        
+        # Convert the expiry_time
+        expiry_time = self.submit_text_service.convert_datetime_to_utc_timestamp(expiry_time)
 
         logger.info(f'I\'ve retrieved some fields: {text}')
+
          # Get timestamp and user agent from the request metadata
-        timestamp = timezone.now()  # This would be recorded when the request is received
+        # TODO: replace with the frontend precise timestamp
+        timestamp = self.submit_text_service.get_current_int_utc_timestamp()
         user_agent = self.request.META.get('HTTP_USER_AGENT', '')
 
         logger.info(f'I\'ve retrieved some metadata fields: {user_agent}')
@@ -53,19 +58,16 @@ class SubmitTextView(CreateView):
         logger.info(expiry_time)
 
         # Make request to hash-server
-        url = self.submit_text_service.get_hash_from_server()
+        rel_url = self.submit_text_service.get_hash_from_server()
 
-        # Make necessary convertations:
-        timestamp = self.submit_text_service.convert_iso_to_unix(timestamp)
-        expiry_time = self.submit_text_service.convert_timedelta_to_unix(expiry_time)
 
         # Process the validated form data but don't save to the database yet
         new_entry = form.save(commit=False)
         new_entry.timestamp = timestamp
         new_entry.expiry_time = expiry_time
-        new_entry.password = make_password(password=password)
+        new_entry.password = make_password(password)
         new_entry.user_agent = user_agent
-        new_entry.url = url
+        new_entry.url = rel_url
 
         logger.info(new_entry)
 
@@ -74,7 +76,7 @@ class SubmitTextView(CreateView):
         logger.info(new_entry)
         
         # Save text-paste to blob store:
-        self.s3_service.uload_to_s3(s3_key=form.compose_key(), text_input=text)
+        self.s3_service.upload_to_s3(s3_key=rel_url, text_input=text)
 
         # Add paste to expiry registry:
         self.expiry_controller.add_event(expiry_time, self.__class__.model.id)        

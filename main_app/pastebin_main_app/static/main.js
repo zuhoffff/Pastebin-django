@@ -1,64 +1,58 @@
- // Populate the timer columns with options
- const daysColumn = document.getElementById('days');
- const hoursColumn = document.getElementById('hours');
- const minutesColumn = document.getElementById('minutes');
+document.addEventListener("DOMContentLoaded", function() {
+    // Calculate the date 2 days from now
+    const twoDaysFromNow = new Date();
+    twoDaysFromNow.setDate(twoDaysFromNow.getDate() + 2);
 
- for (let i = 0; i <= 30; i++) {
-     daysColumn.innerHTML += `<option value="${i}">${i} days</option>`;
- }
+    flatpickr(".flatpickr", {
+        enableTime: true,
+        dateFormat: "Z",
+        time_24hr: true,
+        minuteIncrement: 1,
+        defaultDate: twoDaysFromNow,
+        minDate: "today",
+        altInput: true,
+        altFormat: "F j, Y H:i",
+        allowInput: true
+    });
 
- for (let i = 0; i < 24; i++) {
-     hoursColumn.innerHTML += `<option value="${i}">${i} hours</option>`;
- }
+    // Handle form submission
+    document.getElementById("pasteSubmissionForm").addEventListener("submit", function(event) {
+        event.preventDefault(); // Prevent default form submission
 
- for (let i = 0; i < 60; i++) {
-     minutesColumn.innerHTML += `<option value="${i}">${i} minutes</option>`;
- }
+        const form = event.target;
+        const formData = new FormData(form);
 
- // Event listener for form submission
- document.getElementById('textForm').addEventListener('submit', function(event) {
-     event.preventDefault();
+        // Submit form data using Fetch API
+        fetch(form.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Process the response data
+            document.getElementById('responseMessage').textContent = 'Success: ' + data.message;
+            const url = window.location.origin + data.url;
+            document.getElementById('responseUrl').innerHTML = `<a href="${url}" target="_blank">${url}</a>`;
 
-     const textInput = document.getElementById('textInput').value;
-     const userAgent = navigator.userAgent;
+            // Show the response with animation
+            const responseElement = document.getElementById('response');
+            responseElement.classList.add('show');
 
-     const passwordInput = document.getElementById('passwordInput').value.trim();
-     const authorInput = document.getElementById('authorInput').value.trim();
-     
-     // Validate author input
-     const authorPattern = /^[a-zA-Z0-9_@-]*$/;
-     if (!authorPattern.test(authorInput)) {
-         document.getElementById('responseMessage').textContent = 'Error: Author name can only contain letters, numbers, and _ @ -';
-         return;
-     }
+            // Scroll into view if needed (especially useful for small screens)
+            responseElement.scrollIntoView({ behavior: 'smooth' });
+        })
+        .catch(error => {
+            document.getElementById('responseMessage').textContent = 'Error: ' + error;
 
-     const days = document.getElementById('days').value;
-     const hours = document.getElementById('hours').value;
-     const minutes = document.getElementById('minutes').value;
-     const expiry = `${days}.${hours}.${minutes}`;
+            // Show the response with animation
+            const responseElement = document.getElementById('response');
+            responseElement.classList.add('show');
 
-     const formData = new URLSearchParams();
-     formData.append('text', textInput);
-     formData.append('expiry', expiry);
-     formData.append('userAgent', userAgent);
-     if (authorInput) { formData.append('author', authorInput); }
-     if (passwordInput) { formData.append('password', passwordInput); }
-     
-     // Send POST request with form data
-     fetch('/submit-text/', {
-         method: 'POST',
-         headers: {
-             'Content-Type': 'application/x-www-form-urlencoded',
-         },
-         body: formData.toString()
-     })
-     .then(response => response.json())
-     .then(data => {
-         document.getElementById('responseMessage').textContent = 'Success: ' + data.message;
-         const url = window.location.origin + data.url;
-         document.getElementById('responseUrl').innerHTML = `<a href="${url}" target="_blank">${url}</a>`;
-     })
-     .catch(error => {
-         document.getElementById('responseMessage').textContent = 'Error: ' + error;
-     });
- });
+            // Scroll into view if needed
+            responseElement.scrollIntoView({ behavior: 'smooth' });
+        });
+    });
+});
