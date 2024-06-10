@@ -1,28 +1,29 @@
+from django.http.response import HttpResponse as HttpResponse
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.hashers import check_password
 from ..models import Metadata
-from django.http import JsonResponse
+from django.http import HttpRequest, JsonResponse
 import time
 from django.core.cache import cache
 import logging
 from pastebin_main_app.utils.s3_handler import myS3Service
-
-# TODO: remake into oop if sufficient
+from django.views.generic.detail import DetailView
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 def get_text(request, url):
     # Check if object on the cache
     current_data = cache.get(url)
 
     if current_data:
-        LOGGER.info('hit cache')
+        logger.info('hit cache')
     else:
         metadata = get_object_or_404(Metadata, url=url)
+        time_til_expiry = metadata.expiry_time - metadata.timestamp
         current_data = {
         'block_id': metadata.id,
-        'expiry': metadata.expiry_time,
+        'expiry': time_til_expiry,
         'password': metadata.password,
         'author': metadata.author,
         'key': metadata.compose_key(),
@@ -30,11 +31,7 @@ def get_text(request, url):
         cache.set(url, current_data, timeout=300)
         metadata.key_usages+=1
         metadata.save()
-        LOGGER.info('hit db')
-
-    # Check if the paste has expired
-    if current_data['expiry'] < time.time():
-        return render(request, 'expired.html')
+        logger.info('hit db')
 
     # Adjust the json to send it to the page
     current_data['text'] = myS3Service.retrieve_from_s3(current_data['key'])

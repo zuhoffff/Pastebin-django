@@ -1,7 +1,7 @@
+from django.db.models.base import Model as Model
 from django.shortcuts import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic.edit import CreateView
-# from django.views.generic import TemplateView
 from .submit_text.submition_form import PasteSubmissionForm
 from django.contrib.auth.hashers import make_password
 from django.http import HttpResponse, JsonResponse
@@ -12,18 +12,9 @@ from .utils.s3_handler import myS3Service
 from .utils.expiry_controller import myExpController
 from django.utils.decorators import method_decorator
 import logging
-from django.utils import timezone
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
-
-# @method_decorator(csrf_exempt, name='dispatch')
-# class HomeView(TemplateView):
-
-#     def get_context_data(self, **kwargs):
-#         context = super().get_context_data(**kwargs)
-#         context['form'] = PasteSubmissionForm()
-#         return context
 
 @method_decorator(csrf_exempt, name='dispatch')
 class SubmitTextView(CreateView):

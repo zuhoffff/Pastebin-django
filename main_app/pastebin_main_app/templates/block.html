@@ -6,6 +6,10 @@
     <title>Pastebin - View Paste</title>
     {% load static %}
     <link rel="stylesheet" href="{% static 'block.css' %}">
+    <!-- Include dayjs from a CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
+    <!-- Optional: Include duration plugin if you need precise control over time formatting -->
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1/plugin/duration.js"></script>
 </head>
 <body>
     <h1>Paste ID: {{ block_id }}</h1>
@@ -23,23 +27,30 @@
     </div>
 
     <script>
+        // Activate the duration plugin
+        dayjs.extend(dayjs_plugin_duration);
+
         function startTimer(duration, display) {
-        var timer = duration, minutes, seconds;
-        var intervalId = setInterval(function () {
-            minutes = parseInt(timer / 60, 10);
-            seconds = parseInt(timer % 60, 10);
+            var endTime = dayjs().add(duration, 'seconds'); // Calculate the end time
 
-            minutes = minutes < 10 ? "0" + minutes : minutes;
-            seconds = seconds < 10 ? "0" + seconds : seconds;
+            var intervalId = setInterval(function () {
+                var now = dayjs(); // Get the current time
+                var remaining = dayjs.duration(endTime.diff(now)); // Calculate the remaining duration
 
-            display.textContent = minutes + ":" + seconds;
+                // Format the remaining time as "DD:HH:MM:SS"
+                var days = remaining.days().toString().padStart(2, '0');
+                var hours = remaining.hours().toString().padStart(2, '0');
+                var minutes = remaining.minutes().toString().padStart(2, '0');
+                var seconds = remaining.seconds().toString().padStart(2, '0');
 
-            if (--timer < 0) {
-                clearInterval(intervalId); // Stop the timer
-                display.textContent = "00:00"; // Update display to show 00:00
-                showExpiredPage(); // Call function to display expired page
-            }
-        }, 1000);
+                display.textContent = `${days}:${hours}:${minutes}:${seconds}`;
+
+                if (remaining.asSeconds() <= 0) {
+                    clearInterval(intervalId); // Stop the timer
+                    display.textContent = "00:00:00:00"; // Update display to show 00:00:00:00
+                    showExpiredPage(); // Call function to display expired page
+                }
+            }, 1000);
         }
 
         function showExpiredPage() {
@@ -65,11 +76,15 @@
         }
 
         window.onload = function () {
-            var expiryTime = {{ expiry }};
-            var now = Math.floor(Date.now() / 1000); // Current time in Unix timestamp format
-            var duration = expiryTime - now; // Duration in seconds until expiry
-            var display = document.querySelector('#timer');
-            startTimer(duration, display);
+            var duration = {{ expiry }}; // Time until expiry in seconds
+
+            if (duration > 0) {
+                var display = document.querySelector('#timer');
+                startTimer(duration, display);
+            } else {
+                showExpiredPage(); // If duration is negative or zero, show expired page immediately
+            }
         };
     </script>
+</body>
 </html>
