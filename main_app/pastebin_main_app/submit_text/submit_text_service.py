@@ -1,8 +1,8 @@
+from datetime import datetime, timezone
 import dateutil.parser as dp
 import logging
 import requests
 from os import environ
-import datetime
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 LOGGER = logging.getLogger(__name__)
@@ -30,14 +30,6 @@ class SubmitTextService():
             raise Exception(self.ERROR_HASH_SERVER)
     
     @staticmethod
-    def convert_string_to_unix_time(time_str) -> float:
-        ''' Converts {days}.{hours}.{minutes} to unix time'''
-        # Parse the expiry string
-        days, hours, minutes = map(int, time_str.split('.'))
-        time_til_expiry = datetime.timedelta(days=days, hours=hours, minutes=minutes)
-        return float(time_til_expiry.timestamp())
-    
-    @staticmethod
     def convert_timedelta_to_unix(timedelta_obj):
         epoch = datetime.utcfromtimestamp(0)
         return int((epoch + timedelta_obj).timestamp())
@@ -47,5 +39,14 @@ class SubmitTextService():
         parsed_t = dp.parse(time_iso8601)
         t_in_seconds = parsed_t.timestamp()
         return float(t_in_seconds)
+    
+    @staticmethod
+    def convert_datetime_to_utc_timestamp(dt: datetime) -> int:
+        return int(dt.replace(tzinfo=timezone.utc).timestamp())
+    
+    @staticmethod
+    def get_current_int_utc_timestamp() -> int:
+        return int(datetime.utcnow().timestamp())
+
     
 submitTextService = SubmitTextService(HASH_SERVER_URI)
