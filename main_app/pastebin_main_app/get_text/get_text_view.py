@@ -3,20 +3,16 @@ from django.http.response import HttpResponse as HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.hashers import check_password
 from ..models import Metadata
-from django.http import HttpRequest, JsonResponse
-import time
 from django.core.cache import cache
 import logging
 from pastebin_main_app.utils.s3_handler import myS3Service
 from django.views import View
 from django.contrib.auth.hashers import check_password
-from time import time
 from pastebin_main_app.utils.s3_handler import myS3Service
 import logging
 from pastebin_main_app.utils.s3_handler import myS3Service
 from django.views.generic.detail import DetailView
 from django.forms.models import model_to_dict
-from django.urls import reverse
 # TODO: figure out design problem: use 3 views or use flag : CHECKED
 
 
@@ -65,44 +61,8 @@ class PasteDetailView(DetailView): # or View
             self.obj=get_object_or_404(self.model, slug=slug)
             self.payload=model_to_dict(self.obj)
             self.payload['text']=myS3Service.retrieve_from_s3(self.obj.slug)
+            # Convert expiry time to convinient format
             cache.set(slug, self.payload, timeout=self.cache_timeout)
-        # return render(request, 'block.html', self.payload)
-        return JsonResponse(self.payload)
-
-    # TODO: double-check expiry time format!
-    # def dispatch(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
-    #     # Check if cached:
-    #     slug=kwargs.get('slug')
-    #     logger.info(slug)
-    #     logger.info(self.model)
-    #     self.payload = cache.get(slug)
-    #     if not self.payload:
-    #         self.obj = get_object_or_404(self.model, slug=slug)
-
-    #         # Refresh statistics
-    #         self.obj.key_usages+=1
-    #         self.obj.save()
-
-    #         # Modify the payload
-    #         self.payload = (model_to_dict(self.obj))
-    #         self.payload['text'] = myS3Service.retrieve_from_s3(self.obj.slug)
-
-    #         cache.set(slug, self.payload, timeout=self.cache_timeout)
-
-    #         logger.info(self.payload)
-    #         logger.info(self.obj)
-
-    #     return super().dispatch(request, *args, **kwargs)
-    
-    
-
-    # def post(self, request, slug):
-    #     password = request.POST.get('password', '')
-    #     if not check_password(password, self.obj.password):
-    #         return redirect('paste_password_prompt', slug=slug)
-    #     else:
-    #         return self.show_content(request=request)
-
-    # def show_content(self, request):
-    #     # TODO: specify which object field to show on the page.
-    #     return JsonResponse(model_to_dict(self.obj))
+        # TODO: specify which object field to show on the page.
+        return render(request, 'block.html', self.payload)
+        # return JsonResponse(self.payload)

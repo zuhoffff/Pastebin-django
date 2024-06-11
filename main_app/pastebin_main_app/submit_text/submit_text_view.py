@@ -32,26 +32,20 @@ class SubmitTextView(CreateView):
         text = form_data.get('text')
         expiry_time = form_data.get('expiry_time')
         password = form_data.get('password')
-        logger.info(password)
         
         # Convert the expiry_time
         expiry_time = self.submit_text_service.convert_datetime_to_utc_timestamp(expiry_time)
-
-        logger.info(f'I\'ve retrieved some fields: {text}')
 
          # Get timestamp and user agent from the request metadata
         # TODO: replace with the frontend precise timestamp
         timestamp = self.submit_text_service.get_current_int_utc_timestamp()
         user_agent = self.request.META.get('HTTP_USER_AGENT', '')
-
-        logger.info(f'I\'ve retrieved some metadata fields: {user_agent}')
         
         logger.info(timestamp)
         logger.info(expiry_time)
 
         # Make request to hash-server
         slug = self.submit_text_service.get_hash_from_server()
-
 
         # Process the validated form data but don't save to the database yet
         new_entry = form.save(commit=False)
