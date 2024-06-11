@@ -25,4 +25,4 @@ def delete_expired_entry_by_id(id):
     from ..models import Metadata
     from pastebin_main_app.utils.s3_handler import myS3Service
     expired_entry = Metadata.objects.get(id=id)
-    myS3Service.delete_from_s3(expired_entry.url)
+    myS3Service.delete_from_s3(expired_entry.slug)

@@ -49,7 +49,7 @@ class SubmitTextView(CreateView):
         logger.info(expiry_time)
 
         # Make request to hash-server
-        rel_url = self.submit_text_service.get_hash_from_server()
+        slug = self.submit_text_service.get_hash_from_server()
 
 
         # Process the validated form data but don't save to the database yet
@@ -58,7 +58,7 @@ class SubmitTextView(CreateView):
         new_entry.expiry_time = expiry_time
         new_entry.password = make_password(password)
         new_entry.user_agent = user_agent
-        new_entry.url = rel_url
+        new_entry.slug = slug
 
         logger.info(new_entry)
 
@@ -67,7 +67,7 @@ class SubmitTextView(CreateView):
         logger.info(new_entry)
         
         # Save text-paste to blob store:
-        self.s3_service.upload_to_s3(s3_key=rel_url, text_input=text)
+        self.s3_service.upload_to_s3(s3_key=slug, text_input=text)
 
         # Add paste to expiry registry:
         self.expiry_controller.add_event(expiry_time, self.__class__.model.id)        
