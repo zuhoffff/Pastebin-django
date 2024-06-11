@@ -2,7 +2,7 @@ from django.http.response import HttpResponse as HttpResponse
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.hashers import check_password
 from ..models import Metadata
-from django.http import HttpRequest, JsonResponse
+from django.http import JsonResponse
 import time
 from django.core.cache import cache
 import logging
