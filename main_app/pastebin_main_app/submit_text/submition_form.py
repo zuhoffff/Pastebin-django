@@ -10,7 +10,7 @@ class PasteSubmissionForm(forms.ModelForm):
     expiry_time = forms.DateTimeField(
         input_formats=['%Y-%m-%dT%H:%M:%SZ'],
         widget=forms.TextInput(attrs={
-            'placeholder': '2024-06-12T13:27:49Z',
+            'placeholder': '',
             'class': 'flatpickr'
         })
     )
