@@ -32,6 +32,7 @@ class SubmitTextView(CreateView):
         text = form_data.get('text')
         expiry_time = form_data.get('expiry_time')
         password = form_data.get('password')
+        logger.info(password)
         
         # Convert the expiry_time
         expiry_time = self.submit_text_service.convert_datetime_to_utc_timestamp(expiry_time)
@@ -56,7 +57,7 @@ class SubmitTextView(CreateView):
         new_entry = form.save(commit=False)
         new_entry.timestamp = timestamp
         new_entry.expiry_time = expiry_time
-        new_entry.password = make_password(password)
+        if password: new_entry.password = make_password(password)
         new_entry.user_agent = user_agent
         new_entry.slug = slug
 
@@ -72,7 +73,7 @@ class SubmitTextView(CreateView):
         # Add paste to expiry registry:
         self.expiry_controller.add_event(expiry_time, self.__class__.model.id)        
 
-        full_url = f'/paste/{new_entry.url}/'
+        full_url = f'/paste/{new_entry.slug}/'
         response_data = {
             'success': True,
             'message': 'Form submitted successfully!',
