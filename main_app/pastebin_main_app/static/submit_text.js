@@ -5,7 +5,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
     flatpickr(".flatpickr", {
         enableTime: true,
-        dateFormat: "Z",
+        // dateFormat: "", # use default
         time_24hr: true,
         minuteIncrement: 1,
         defaultDate: twoDaysFromNow,
