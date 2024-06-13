@@ -42,6 +42,9 @@ class SubmitTextService():
     
     @staticmethod
     def convert_datetime_to_utc_timestamp(dt: datetime) -> int:
+        """
+        make sure that timezone is utc:
+        """
         return int(dt.replace(tzinfo=timezone.utc).timestamp())
     
     @staticmethod

@@ -12,7 +12,7 @@
     <script src="https://cdn.jsdelivr.net/npm/dayjs@1/plugin/duration.js"></script>
 </head>
 <body>
-    <h1>Paste ID: {{ block_id }}</h1>
+    <h1>Paste ID: {{ slug }}</h1>
     <div id="pasteContent">
         <pre>{{ text }}</pre>
         {% if author %}
@@ -77,7 +77,7 @@
         }
 
         window.onload = function () {
-            var duration = {{ expiry }}; // Time until expiry in seconds
+            var duration = {{ expiry_time }}; // Time until expiry in seconds
 
             if (duration > 0) {
                 var display = document.querySelector('#timer');

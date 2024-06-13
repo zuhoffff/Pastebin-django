@@ -13,8 +13,6 @@ import logging
 from pastebin_main_app.utils.s3_handler import myS3Service
 from django.views.generic.detail import DetailView
 from django.forms.models import model_to_dict
-# TODO: figure out design problem: use 3 views or use flag : CHECKED
-
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -49,7 +47,7 @@ class PasswordPromptView(View):
             return render(request, 'password_prompt.html', {'slug': slug})
 
 
-class PasteDetailView(DetailView): # or View
+class PasteDetailView(DetailView):
     model = Metadata
     cache_timeout = 300
     payload = {}
