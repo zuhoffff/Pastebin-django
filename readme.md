@@ -9,7 +9,6 @@ User can add a block of text through the web GUI or by dropping a text file.
 - **Max Size Limit**: To be implemented (10MB).
 - **Set Expiry Time**: Users can set the lifespan of their content.
     - **Additional Feature**: Real-time display of time until expiry when viewing the paste.
-        - (Todo: Improve timer logic precision, fix timer delay on the main page).
 - **Password Protection**: Users can add a password to a block.
 
 ### Security:

@@ -34,22 +34,13 @@ class SubmitTextView(CreateView):
         expiry_time = form_data.get('expiry_time')
 
         timestamp = datetime.now(timezone.utc)
-        
-        logger.info(f"Original expiry_time: {expiry_time} (type: {type(expiry_time)})")
 
         # Convert the expiry_time and add to expiry registry
         epoch_expiry_time = self.submit_text_service.convert_datetime_to_utc_timestamp(expiry_time)
         self.expiry_controller.add_event(epoch_expiry_time, self.__class__.model.id)        
-
-        logger.info(f"Converted epoch_expiry_time: {epoch_expiry_time} (type: {type(epoch_expiry_time)})")
-        logger.info(f"Expiry_time after conversion method (should be unchanged): {expiry_time} (type: {type(expiry_time)})")
         
         # Get timestamp and user agent from the request metadata
-        # TODO: move all possible logic to submit_text_servise for encapsulation
         user_agent = self.request.META.get('HTTP_USER_AGENT', '')
-        
-        logger.info(f"expiry_time: {expiry_time} (type: {type(expiry_time)})")
-        logger.info(f"epoch_expiry_time: {epoch_expiry_time} (type: {type(epoch_expiry_time)})")
 
         # Make request to hash-server
         slug = self.submit_text_service.get_hash_from_server()
@@ -61,7 +52,6 @@ class SubmitTextView(CreateView):
         new_entry.timestamp = timestamp
         new_entry.slug = slug
 
-        logger.info(f"New entry before save: {new_entry}")
         logger.info(f"expiry_time: {new_entry.expiry_time} (type: {type(new_entry.expiry_time)})")
         logger.info(f"timestamp: {new_entry.timestamp} (type: {type(new_entry.timestamp)})")
         logger.info(f"user_agent: {new_entry.user_agent} (type: {type(new_entry.user_agent)})")
@@ -70,7 +60,7 @@ class SubmitTextView(CreateView):
 
         new_entry.save()
 
-        logger.info(f"New entry saved: {new_entry}")
+        logger.info("New entry saved,")
         
         # Save text-paste to blob store:
         self.s3_service.upload_to_s3(s3_key=slug, text_input=text)
