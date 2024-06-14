@@ -20,13 +20,13 @@ logger = logging.getLogger(__name__)
 
 class CheckProtection(View):
     model = Metadata
-    
+
     def get(self, request, slug):
         self.obj = get_object_or_404(self.model, slug=slug)
-        if not self.obj.is_protected():
-            return redirect('paste_detail_view',slug=slug)
-        else:
+        if self.obj.is_protected():
             return redirect('paste_password_prompt', slug=slug)
+        else:
+            return redirect('paste_detail_view',slug=slug)
         
 class PasswordPromptView(View):
     model = Metadata
@@ -62,4 +62,4 @@ class PasteDetailView(View):
             cache.set(slug, self.payload, timeout=self.cache_timeout)
         else:
             logger.info('hit cache')
-        return render(request, 'block.html', self.payload)
+        return render(request, 'view_paste.html', self.payload)

@@ -1,31 +1,28 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Paste Submission Form</title>
+{% extends 'base.html' %}
+{% load static %}
 
-    {% load static %}
-    <!-- Include flatpickr CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <link rel="stylesheet" href="{% static 'home.css' %}">
-</head>
-<body>
-    <form id="pasteSubmissionForm" method="post" action="">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Submit</button>
-    </form>
+{% block title %}New text-paste Submission Form{% endblock %}
 
-    <div id="response">
-        <p id="responseMessage"></p>
-        <div id="responseUrl"></div>
-    </div>
+{% block stylesheets %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<link rel="stylesheet" href="{% static 'submit_text.css' %}">
+{% endblock %}
 
-    <!-- Include flatpickr JavaScript -->
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+{% block content %}
+<form id="pasteSubmissionForm" method="post" action="">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Submit</button>
+</form>
 
-    <!-- JavaScript code for flatpickr initialization -->
-    <script src="{% static 'submit_text.js' %}"></script>
-</body>
-</html>
+<div id="response">
+    <p id="responseMessage"></p>
+    <div id="responseUrl"></div>
+</div>
+{% endblock %}
+
+<!-- var expiryTime = dayjs('{{ expiry_time|escapejs }}'); -->
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="{% static 'submit_text.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,94 @@
+/* base.css */
+
+/* Reset basic elements for consistent styling across browsers */
+body, h1, p, form, input, button, div {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Arial', sans-serif;
+}
+
+/* Set a background gradient for the body */
+body {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #ff7e5f, #feb47b);
+    padding: 1rem;
+    overflow: hidden; /* Prevent scrolling */
+}
+
+/* Style the main content area */
+main {
+    max-width: 800px;
+    width: 100%;
+    margin: 50px auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Enhance the styling for anchor tags */
+a {
+    color: #007BFF;
+    text-decoration: none;
+    border-bottom: 2px solid transparent;
+    transition: color 0.3s, border-color 0.3s;
+}
+
+a:hover {
+    color: #0056b3;
+    border-color: #0056b3;
+}
+
+/* Enhance the styling for paragraph tags */
+p {
+    margin: 1em 0;
+    font-size: 1.1em;
+    color: #333;
+    line-height: 1.6;
+    text-align: justify;
+}
+
+/* General button styling */
+button {
+    background-color: #007BFF;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+input[type="text"],
+textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+@media (max-width: 600px) {
+    main {
+        margin: 20px;
+        padding: 15px;
+    }
+
+    button {
+        padding: 8px 16px;
+    }
+}

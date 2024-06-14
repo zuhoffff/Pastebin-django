@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Home - Pastebin{% endblock %}
+
+{% block stylesheets %}
+<link rel="stylesheet" href="{% static 'home.css' %}">
+{% endblock %}
+
+{% block content %}
+<form id="slugForm" method="post" action="">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Search</button>
+</form>
+<p> OR </p>
+<a href="{% url 'submit_text' %}">Create new text-paste:</a>
+{% endblock %}
