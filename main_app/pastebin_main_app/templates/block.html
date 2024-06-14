@@ -8,8 +8,8 @@
     <link rel="stylesheet" href="{% static 'block.css' %}">
     <!-- Include dayjs from a CDN -->
     <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
-    <!-- Optional: Include duration plugin if you need precise control over time formatting -->
     <script src="https://cdn.jsdelivr.net/npm/dayjs@1/plugin/duration.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1/plugin/relativeTime.js"></script>
 </head>
 <body>
     <h1>Paste ID: {{ slug }}</h1>
@@ -25,67 +25,49 @@
     <div class="footer">
         <a href="/">Create New Paste</a>
     </div>
-
+    
     <script>
-        // Activate the duration plugin
+        // Activate the duration and relativeTime plugins
         dayjs.extend(dayjs_plugin_duration);
+        dayjs.extend(dayjs_plugin_relativeTime);
 
-        function startTimer(duration, display) {
-            var endTime = dayjs().add(duration, 'seconds'); // Calculate the end time
-
-            var intervalId = setInterval(function () {
-                var now = dayjs(); // Get the current time
-                var remaining = dayjs.duration(endTime.diff(now)); // Calculate the remaining duration
-
-                // Format the remaining time as "DD:HH:MM:SS"
-                var days = remaining.days().toString().padStart(2, '0');
-                var hours = remaining.hours().toString().padStart(2, '0');
-                var minutes = remaining.minutes().toString().padStart(2, '0');
-                var seconds = remaining.seconds().toString().padStart(2, '0');
-
-                display.textContent = `${days}:${hours}:${minutes}:${seconds}`;
-
-                if (remaining.asSeconds() <= 0) {
-                    clearInterval(intervalId); // Stop the timer
-                    display.textContent = "00:00:00:00"; // Update display to show 00:00:00:00
-                    showExpiredPage(); // Call function to display expired page
-                }
+        window.onload = function () {
+            // Parse the expiry time passed from the backend
+            var expiryTime = dayjs('{{ expiry_time|escapejs }}');
+            var display = document.querySelector('#timer');
+            updateTimer(expiryTime, display); // Initial call to set the time
+            var intervalId = setInterval(function() {
+                updateTimer(expiryTime, display, intervalId);
             }, 1000);
+        };
+
+        function updateTimer(expiryTime, display, intervalId) {
+            var now = dayjs();
+            var remaining = expiryTime.diff(now, 'second'); // Calculate the remaining time in seconds
+
+            if (remaining <= 0) {
+                clearInterval(intervalId); // Stop the timer
+                display.innerHTML = "00:00:00:00"; // Show expired
+                showExpiredPage(); // Call function to display expired page
+            } else {
+                var duration = dayjs.duration(remaining, 'seconds');
+                var days = duration.days().toString().padStart(2, '0');
+                var hours = duration.hours().toString().padStart(2, '0');
+                var minutes = duration.minutes().toString().padStart(2, '0');
+                var seconds = duration.seconds().toString().padStart(2, '0');
+                display.innerHTML = `${days}:${hours}:${minutes}:${seconds}`;
+            }
         }
 
         function showExpiredPage() {
-            // Replace current HTML content with expired page HTML
-            document.documentElement.innerHTML = `
-                <!DOCTYPE html>
-                <html lang="en">
-                <head>
-                    <meta charset="UTF-8">
-                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                    <title>Expired Post</title>
-                    {% load static %}
-                    <link rel="stylesheet" href="{% static 'expired.css' %}">
-                </head>
-                <body>
-                    <div class="container">
-                        <h1>This Page Has Expired</h1>
-                        <p>Sorry, the content you are trying to access has expired.</p>
-                        <p>Please visit our <a href="{% url 'submit_text' %}">homepage</a> !</p>
-                    </div>
-                </body>
-                </html>
+            document.body.innerHTML = `
+                <div class="container">
+                    <h1>This Page Has Expired</h1>
+                    <p>Sorry, the content you are trying to access has expired.</p>
+                    <p>Please visit our <a href="{% url 'submit_text' %}">homepage</a>!</p>
+                </div>
             `;
         }
-
-        window.onload = function () {
-            var duration = {{ expiry_time }}; // Time until expiry in seconds
-
-            if (duration > 0) {
-                var display = document.querySelector('#timer');
-                startTimer(duration, display);
-            } else {
-                showExpiredPage(); // If duration is negative or zero, show expired page immediately
-            }
-        };
     </script>
 </body>
 </html>

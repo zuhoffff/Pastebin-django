@@ -59,8 +59,12 @@ class PasteDetailView(DetailView):
             self.obj=get_object_or_404(self.model, slug=slug)
             self.payload=model_to_dict(self.obj)
             self.payload['text']=myS3Service.retrieve_from_s3(self.obj.slug)
+
+            logger.info(f'expiry time: {self.obj.expiry_time} --- type: {type(self.obj.expiry_time)}')
+
             # Convert expiry time to convinient format
             cache.set(slug, self.payload, timeout=self.cache_timeout)
+
         # TODO: specify which object field to show on the page.
         return render(request, 'block.html', self.payload)
         # return JsonResponse(self.payload)
