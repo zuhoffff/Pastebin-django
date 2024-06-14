@@ -65,3 +65,5 @@ User can navigate to the list of all public pastes
 #### TODO: create tests.
 #### TODO: make logging integral for whole project
 #### TODO: make config file for the AWS to not store credentials in public repo!
+#### TODO: use templating for html files
+#### TODO: allow naming of pastes and access by name

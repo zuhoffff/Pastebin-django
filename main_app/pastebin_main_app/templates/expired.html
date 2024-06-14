@@ -1,16 +1,16 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Expired Post</title>
-    {% load static %}
-    <link rel="stylesheet" href="{% static 'expired.css' %}">
-</head>
-<body>
-    <div class="container">
-        <h1>This Page Has Expired</h1>
-        <p>Sorry, the content you are trying to access has expired.</p>
-    </div>
-</body>
-</html>
+{% block title %}Expired Text-Paste{% endblock %}
+
+{% block stylesheets %}
+<link rel="stylesheet" href="{% static 'expired.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>This Page Has Expired</h1>
+    <p>Sorry, the content you are trying to access has expired.</p>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'password_prompt.js' %}"></script>
+{% endblock %}

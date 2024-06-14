@@ -1,36 +1,7 @@
-/* Reset basic elements for consistent styling across browsers */
-body, h1, p, form, input, button, div {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'Arial', sans-serif;
-}
-
-/* Set a background gradient for the body */
-body {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    background: linear-gradient(135deg, #ff7e5f, #feb47b);
-    padding: 1rem;
-    animation: backgroundGradient 15s ease infinite;
-    overflow: hidden; /* Prevent scrolling */
-}
-
-/* Keyframes for background gradient animation */
-@keyframes backgroundGradient {
-    0%, 100% {
-        background: linear-gradient(135deg, #ff7e5f, #feb47b);
-    }
-    50% {
-        background: linear-gradient(135deg, #42e695, #3bb2b8);
-    }
-}
+/* home.css */
 
 /* Style the form container */
-#pasteSubmissionForm {
+#slugForm {
     background: #fff;
     padding: 2rem;
     border-radius: 10px;
@@ -38,28 +9,15 @@ body {
     width: 100%;
     max-width: 400px;
     text-align: center;
-    transition: box-shadow 0.3s ease, transform 0.3s ease;
     margin-bottom: 2rem; /* Space below the form for the response */
 }
 
-#pasteSubmissionForm:hover {
+#slugForm:hover {
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
-    transform: translateY(-5px);
 }
 
-/* Style the CSRF token input and Django form elements */
-input[type="hidden"] {
-    display: none;
-}
-
-#pasteSubmissionForm p {
-    margin-bottom: 1rem;
-    color: #555;
-}
-
-/* Style the inputs and textareas */
-#pasteSubmissionForm input,
-#pasteSubmissionForm textarea {
+#slugForm input[type="text"],
+#slugForm textarea {
     width: 100%;
     padding: 0.75rem;
     margin-bottom: 1rem;
@@ -69,15 +27,15 @@ input[type="hidden"] {
     font-size: 1rem;
 }
 
-#pasteSubmissionForm input:focus,
-#pasteSubmissionForm textarea:focus {
+#slugForm input[type="text"]:focus,
+#slugForm textarea:focus {
     border-color: #ff7e5f;
     outline: none;
     box-shadow: 0 0 8px rgba(255, 126, 95, 0.5);
 }
 
 /* Style the submit button */
-#pasteSubmissionForm button {
+#slugForm button {
     background: linear-gradient(135deg, #ff7e5f, #feb47b);
     color: #fff;
     border: none;
@@ -89,45 +47,29 @@ input[type="hidden"] {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-#pasteSubmissionForm button:hover {
+#slugForm button:hover {
     background: linear-gradient(135deg, #feb47b, #ff7e5f);
-    transform: scale(1.05);
 }
 
-/* Style the response container */
-#response {
-    margin-top: 0;
-    padding: 1.5rem;
-    background: rgba(255, 255, 255, 0.95);
-    border-radius: 10px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    width: 100%;
-    max-width: 400px;
+/* Style the paragraph and link */
+p {
+    margin: 20px 0;
+    font-weight: bold;
     text-align: center;
-    transition: opacity 0.3s ease, transform 0.3s ease;
-    opacity: 0;
-    transform: translateY(20px);
-    display: none; /* Initially hidden */
 }
 
-#response.show {
+a {
     display: block;
-    opacity: 1;
-    transform: translateY(0);
+    text-align: center;
+    background-color: #3c3ec9;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
 }
 
-/* Style the response message */
-#responseMessage {
-    font-size: 1.2rem;
-    color: #333;
-    margin-bottom: 1rem;
-}
-
-#responseUrl {
-    margin-top: 0.5rem;
-    font-size: 0.9rem;
-    color: #007BFF;
-    text-decoration: underline;
+a:hover {
+    background-color: #851d20;
 }
 
 /* Responsive design for smaller screens */
@@ -137,13 +79,8 @@ input[type="hidden"] {
         overflow: auto; /* Allow scrolling on small screens */
     }
 
-    #pasteSubmissionForm {
+    #slugForm {
         width: 100%;
         padding: 1.5rem;
-    }
-
-    #response {
-        margin-top: 1.5rem;
-        width: 100%;
     }
 }
