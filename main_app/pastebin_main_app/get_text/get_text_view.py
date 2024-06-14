@@ -1,4 +1,3 @@
-from django.views.generic.detail import DetailView
 from django.http.response import HttpResponse as HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.hashers import check_password
@@ -26,7 +25,6 @@ class CheckProtection(View):
         self.obj = get_object_or_404(self.model, slug=slug)
         if not self.obj.is_protected():
             return redirect('paste_detail_view',slug=slug)
-            # return self.show_content(request=request)
         else:
             return redirect('paste_password_prompt', slug=slug)
         
@@ -47,7 +45,7 @@ class PasswordPromptView(View):
             return render(request, 'password_prompt.html', {'slug': slug})
 
 
-class PasteDetailView(DetailView):
+class PasteDetailView(View):
     model = Metadata
     cache_timeout = 300
     payload = {}
@@ -56,15 +54,12 @@ class PasteDetailView(DetailView):
         # Check if cached:
         self.payload = cache.get(slug)
         if not self.payload:
+            logger.info('hit db')
             self.obj=get_object_or_404(self.model, slug=slug)
             self.payload=model_to_dict(self.obj)
             self.payload['text']=myS3Service.retrieve_from_s3(self.obj.slug)
-
-            logger.info(f'expiry time: {self.obj.expiry_time} --- type: {type(self.obj.expiry_time)}')
-
             # Convert expiry time to convinient format
             cache.set(slug, self.payload, timeout=self.cache_timeout)
-
-        # TODO: specify which object field to show on the page.
+        else:
+            logger.info('hit cache')
         return render(request, 'block.html', self.payload)
-        # return JsonResponse(self.payload)
