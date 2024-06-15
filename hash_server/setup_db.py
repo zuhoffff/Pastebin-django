@@ -1,10 +1,9 @@
 from os import environ
 import logging
-from os import environ
 from sqlalchemy import create_engine, Column, Integer, String, Boolean
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker, scoped_session
 
-logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Database connection parameters
@@ -16,6 +15,10 @@ DB_URL = (f'postgresql://{db_user}:{db_pass}@{db_host}/{db_name}')
 
 Base = declarative_base()
 engine = create_engine(DB_URL)
+session_factory = sessionmaker(bind=engine)
+
+# Use thread-local sessions
+MySession = scoped_session(session_factory)
 
 # Define the Hash model
 class Hashes(Base):

@@ -1,14 +1,15 @@
 import logging
 from sqlalchemy import func
-from sqlalchemy.orm import sessionmaker
 import base64
 from abc import ABC, abstractmethod
-from logger import logger
+import logging
+
+logger = logging.getLogger(__name__)
 
 class AbstractHashDbWizard(ABC):
     @abstractmethod
-    def __init__(self, engine, db_model) -> None:
-        self.Session = sessionmaker(bind=engine)
+    def __init__(self, Session, db_model) -> None:
+        self.Session = Session
         self.db_model = db_model
     
     # Generate a new hash based on the id
@@ -33,7 +34,6 @@ class HashDbWizard(AbstractHashDbWizard):
     
     def __init__(self, engine, db_model) -> None:
         super().__init__(engine, db_model)
-        logger.info('wizard instance craeted')
 
     @staticmethod
     def generate_hash(id):
@@ -48,11 +48,13 @@ class HashDbWizard(AbstractHashDbWizard):
                 hash_entry = self.db_model(hash=new_hash)
                 session.add(hash_entry)
                 session.commit()
+                session.close()
 
     # Count unused hashes
     def count_unused_hashes(self):
         with self.Session() as session:
             count = session.query(func.count(self.db_model.id)).filter_by(used=False).scalar()
+            session.close()
             return count
         
     # Get the next unused hash
@@ -61,4 +63,5 @@ class HashDbWizard(AbstractHashDbWizard):
             next_hash_entry = session.query(self.db_model).filter_by(used=False).first() 
             next_hash_entry.used = True
             session.commit()
+            session.close()
             return next_hash_entry.hash

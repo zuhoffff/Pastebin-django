@@ -4,8 +4,7 @@ import logging
 import requests
 from os import environ
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 HASH_SERVER_URI = environ.get('HASH_SERVER_URI')
 
@@ -25,8 +24,11 @@ class SubmitTextService():
         try:
             response = requests.get(self.hash_server_uri)
             response.raise_for_status()
-            return response.json().get('hash')
+            hash = response.json().get('hash')
+            logger.info(hash)
+            return hash
         except Exception:
+            logger.exception('Hash server error!')
             raise Exception(self.ERROR_HASH_SERVER)
     
     @staticmethod
