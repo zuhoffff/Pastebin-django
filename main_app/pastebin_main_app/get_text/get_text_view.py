@@ -7,13 +7,9 @@ import logging
 from pastebin_main_app.utils.s3_handler import myS3Service
 from django.views import View
 from django.contrib.auth.hashers import check_password
-from pastebin_main_app.utils.s3_handler import myS3Service
 import logging
-from pastebin_main_app.utils.s3_handler import myS3Service
-from django.views.generic.detail import DetailView
 from django.forms.models import model_to_dict
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 # TODO: implement session and authorisation
@@ -24,8 +20,10 @@ class CheckProtection(View):
     def get(self, request, slug):
         self.obj = get_object_or_404(self.model, slug=slug)
         if self.obj.is_protected():
+            logger.info('Text paste is protected: redirecting')
             return redirect('paste_password_prompt', slug=slug)
         else:
+            logger.info('Text paste is public: redirecting to content')
             return redirect('paste_detail_view',slug=slug)
         
 class PasswordPromptView(View):

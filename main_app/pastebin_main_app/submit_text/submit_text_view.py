@@ -1,20 +1,18 @@
-from django.db.models.base import Model as Model
-from django.shortcuts import HttpResponse
-from django.views.decorators.csrf import csrf_exempt
-from django.views.generic.edit import CreateView
-from .submition_form import PasteSubmissionForm
 from django.contrib.auth.hashers import make_password
-from django.http import HttpResponse, JsonResponse
+from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
+from django.http import HttpResponse, JsonResponse
+from django.views.generic.edit import CreateView
+from django.db.models.base import Model as Model
+from .submition_form import PasteSubmissionForm
+from django.shortcuts import HttpResponse
+from datetime import datetime, timezone
 from ..models import Metadata
+from ..utils.expiry_controller import myExpController
 from .submit_text_service import submitTextService
 from ..utils.s3_handler import myS3Service
-from ..utils.expiry_controller import myExpController
-from django.utils.decorators import method_decorator
 import logging
-from datetime import datetime, timezone
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 @method_decorator(csrf_exempt, name='dispatch')
@@ -35,7 +33,7 @@ class SubmitTextView(CreateView):
 
         timestamp = datetime.now(timezone.utc)
 
-        # Convert the expiry_time and add to expiry registry
+        # Calculate the int utc epoch expiry time to add to expiry registry
         epoch_expiry_time = self.submit_text_service.convert_datetime_to_utc_timestamp(expiry_time)
         self.expiry_controller.add_event(epoch_expiry_time, self.__class__.model.id)        
         
@@ -52,15 +50,15 @@ class SubmitTextView(CreateView):
         new_entry.timestamp = timestamp
         new_entry.slug = slug
 
-        logger.info(f"expiry_time: {new_entry.expiry_time} (type: {type(new_entry.expiry_time)})")
-        logger.info(f"timestamp: {new_entry.timestamp} (type: {type(new_entry.timestamp)})")
-        logger.info(f"user_agent: {new_entry.user_agent} (type: {type(new_entry.user_agent)})")
-        logger.info(f"slug: {new_entry.slug} (type: {type(new_entry.slug)})")
-        logger.info(f"password: {new_entry.password} (type: {type(new_entry.password)})")
+        logger.debug(f"expiry_time: {new_entry.expiry_time} (type: {type(new_entry.expiry_time)})")
+        logger.debug(f"timestamp: {new_entry.timestamp} (type: {type(new_entry.timestamp)})")
+        logger.debug(f"user_agent: {new_entry.user_agent} (type: {type(new_entry.user_agent)})")
+        logger.debug(f"slug: {new_entry.slug} (type: {type(new_entry.slug)})")
+        logger.debug(f"password: {new_entry.password} (type: {type(new_entry.password)})")
 
         new_entry.save()
 
-        logger.info("New entry saved,")
+        logger.info("New metadata entry saved")
         
         # Save text-paste to blob store:
         self.s3_service.upload_to_s3(s3_key=slug, text_input=text)
@@ -73,7 +71,6 @@ class SubmitTextView(CreateView):
             'url': full_url,
         }
         return JsonResponse(response_data)
-        # return JsonResponse({'message': 'Text saved successfully', 'url': full_url})
     
     def form_invalid(self, form):
         logger.error('the form is invalid')
