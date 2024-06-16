@@ -4,6 +4,7 @@ import base64
 from abc import ABC, abstractmethod
 import logging
 
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 class AbstractHashDbWizard(ABC):
@@ -32,8 +33,8 @@ class AbstractHashDbWizard(ABC):
 
 class HashDbWizard(AbstractHashDbWizard):
     
-    def __init__(self, engine, db_model) -> None:
-        super().__init__(engine, db_model)
+    def __init__(self, Session, db_model) -> None:
+        super().__init__(Session, db_model)
 
     @staticmethod
     def generate_hash(id):
@@ -45,10 +46,11 @@ class HashDbWizard(AbstractHashDbWizard):
                 last_id = session.query(func.max(self.db_model.id)).scalar() or 0
                 curr_id = last_id+1
                 new_hash = self.generate_hash(curr_id)
-                hash_entry = self.db_model(hash=new_hash)
+                hash_entry = self.db_model(id=curr_id,hash=new_hash)
                 session.add(hash_entry)
-                session.commit()
-                session.close()
+                logger.info('Field added')
+            session.commit()
+            session.close()
 
     # Count unused hashes
     def count_unused_hashes(self):
@@ -60,8 +62,10 @@ class HashDbWizard(AbstractHashDbWizard):
     # Get the next unused hash
     def get_next_unused_hash(self):
         with self.Session() as session:
-            next_hash_entry = session.query(self.db_model).filter_by(used=False).first() 
+            next_hash_entry = session.query(self.db_model).filter_by(used=False).limit(1).first()
             next_hash_entry.used = True
+            hash = next_hash_entry.hash
             session.commit()
             session.close()
-            return next_hash_entry.hash
+            logger.info(f'Extracted db field{hash}')
+            return hash

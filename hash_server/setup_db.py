@@ -4,6 +4,7 @@ from sqlalchemy import create_engine, Column, Integer, String, Boolean
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, scoped_session
 
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Database connection parameters
@@ -12,9 +13,10 @@ db_pass = environ.get('POSTGRES_PASSWORD')
 db_host = environ.get('POSTGRES_HOST')
 db_name = environ.get('POSTGRES_DB')
 DB_URL = (f'postgresql://{db_user}:{db_pass}@{db_host}/{db_name}')
+TEST_DB_URL = f'postgresql://postgres:postgres@localhost/hashes'
 
 Base = declarative_base()
-engine = create_engine(DB_URL)
+engine = create_engine(TEST_DB_URL)
 session_factory = sessionmaker(bind=engine)
 
 # Use thread-local sessions
@@ -31,3 +33,5 @@ class Hashes(Base):
 def setup_database():
     Base.metadata.create_all(engine)
     logger.info('Database setup complete.')
+
+setup_database()
