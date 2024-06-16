@@ -1,3 +1,5 @@
+import logging
+import time
 import json
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from socketserver import ThreadingMixIn
@@ -6,10 +8,10 @@ import threading
 from hash_generator import HashGenerator
 from hashDbWizard import HashDbWizard
 from setup_db import Hashes
-import logging
-import time
 from setup_db import MySession
+import threading
 
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 class CustomThreadingMixIn(ThreadingMixIn):
@@ -20,6 +22,7 @@ class CustomThreadingMixIn(ThreadingMixIn):
         logger.info(f"Starting thread: {thread.name} for request from {client_address}")
         
         self.active_threads_count+=1
+        logger.info(f'Current thread{threading.current_thread()}')
         try:
             super().process_request_thread(request, client_address)
         except Exception:
@@ -27,6 +30,7 @@ class CustomThreadingMixIn(ThreadingMixIn):
         finally:
             self.active_threads_count-=1
             logger.info(f"Ending thread: {thread.name}")
+            logger.info(threading.enumerate())
 
 class CustomThreadingHTTPServer(CustomThreadingMixIn, HTTPServer):
     """Handle requests in a separate thread."""
@@ -69,7 +73,8 @@ class HashServer:
         self.server = custom_server
 
     def _add_spare_hashes_when_idle(self):
-        if self.server.active_threads == 0:
+        if self.server.active_threads_count == 0:
+            logger.info(f'active threads count {self.server.active_threads_count}')
             self.hash_generator.ensure_spare_hashes()
             time.sleep(self.time_to_check)
 
@@ -79,7 +84,8 @@ class HashServer:
         return provider_thread
 
     def start_hash_server(self):
-        self._create_spare_hashes_provider_thread().start()
+        monitoring_thread = self._create_spare_hashes_provider_thread()
+        monitoring_thread.start()
         self.server.serve_forever()
         logger.info('Started hash-server')
 
@@ -98,7 +104,7 @@ def main():
 
     myHashServer = HashServer(server_address=server_address,
                               hash_generator=newHashGenerator,
-                              time_to_check=5)
+                              time_to_check=3)
     
     myServer = CustomThreadingHTTPServer(server_address, handlerClass)
     myHashServer.initialize_hash_server(myServer)
