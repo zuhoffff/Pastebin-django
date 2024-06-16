@@ -7,36 +7,23 @@ from os import environ
 import threading
 from hash_generator import HashGenerator
 from hashDbWizard import HashDbWizard
-from setup_db import Hashes
-from setup_db import MySession
-import threading
+from setup_db import Hashes, session_factory
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 class CustomThreadingMixIn(ThreadingMixIn):
-    active_threads_count = 0
-
-    def process_request_thread(self, request, client_address):
-        thread = threading.current_thread()
-        logger.info(f"Starting thread: {thread.name} for request from {client_address}")
-        
-        self.active_threads_count+=1
-        logger.info(f'Current thread{threading.current_thread()}')
-        try:
-            super().process_request_thread(request, client_address)
-        except Exception:
-            logger.exception('Could not process request')
-        finally:
-            self.active_threads_count-=1
-            logger.info(f"Ending thread: {thread.name}")
-            logger.info(threading.enumerate())
+    """Mix-in class to handle each request in a new thread."""
+    
+    def process_request(self, request, client_address):
+        logger.info(f"Active threads before processing: {threading.active_count()}")
+        super().process_request(request, client_address)
 
 class CustomThreadingHTTPServer(CustomThreadingMixIn, HTTPServer):
     """Handle requests in a separate thread."""
 
 class Handler(BaseHTTPRequestHandler):
-    def __init__(self, localHashGenerator: HashGenerator, *args, **kwargs):
+    def __init__(self, localHashGenerator, *args, **kwargs):
         self.localHashGenerator = localHashGenerator
         super().__init__(*args, **kwargs)
 
@@ -46,10 +33,9 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
         try:
             hash_key = self.localHashGenerator.get_next_unused_hash()
-            logger.info(f'Returned hash: {hash_key}')
             response = json.dumps({'hash': hash_key}).encode()
-        except Exception:
-            logger.error(f'Could not fetch hash from hash generator')
+        except Exception as e:
+            logger.error(f'Could not fetch hash from hash generator: {e}')
             response = json.dumps({'error': 'Hash generation failed'}).encode()
 
         self.wfile.write(response)
@@ -63,7 +49,7 @@ class HandlerFactory:
         return CustomHandler
 
 class HashServer:
-    def __init__(self, server_address: tuple, hash_generator, time_to_check: int, ) -> None:
+    def __init__(self, server_address, hash_generator, time_to_check):
         self.address = server_address
         self.hash_generator = hash_generator
         self.time_to_check = time_to_check
@@ -73,13 +59,15 @@ class HashServer:
         self.server = custom_server
 
     def _add_spare_hashes_when_idle(self):
-        if self.server.active_threads_count == 0:
-            logger.info(f'active threads count {self.server.active_threads_count}')
-            self.hash_generator.ensure_spare_hashes()
+        while True:
+            active_threads = threading.active_count() - 2
+            if active_threads <= 1:
+                logger.info(f'Active threads count: {active_threads}')
+                self.hash_generator.ensure_spare_hashes()
             time.sleep(self.time_to_check)
 
     def _create_spare_hashes_provider_thread(self):
-        provider_thread = threading.Thread(target=self._add_spare_hashes_when_idle, args=(), daemon=True)
+        provider_thread = threading.Thread(target=self._add_spare_hashes_when_idle, daemon=True)
         logger.info(f'Created thread for server activity monitoring: {provider_thread}')
         return provider_thread
 
@@ -90,8 +78,7 @@ class HashServer:
         logger.info('Started hash-server')
 
 def main():
-    # Initialize the hash generator
-    newDbWizard = HashDbWizard(Session = MySession, db_model=Hashes)
+    newDbWizard = HashDbWizard(session_factory=session_factory, db_model=Hashes)
     newHashGenerator = HashGenerator(newDbWizard)
     newHashGenerator.ensure_spare_hashes()
 
@@ -100,14 +87,11 @@ def main():
     server_address = (HOST, PORT)
     logger.info(f'Hash server address: {server_address}')
 
-    handlerClass = HandlerFactory().create_handler(newHashGenerator)
+    handlerClass = HandlerFactory.create_handler(newHashGenerator)
 
-    myHashServer = HashServer(server_address=server_address,
-                              hash_generator=newHashGenerator,
-                              time_to_check=3)
-    
-    myServer = CustomThreadingHTTPServer(server_address, handlerClass)
-    myHashServer.initialize_hash_server(myServer)
+    myHashServer = HashServer(server_address=server_address, hash_generator=newHashGenerator, time_to_check=3)
+    myHTTPServer = CustomThreadingHTTPServer(server_address, handlerClass)
+    myHashServer.initialize_hash_server(myHTTPServer)
     myHashServer.start_hash_server()
 
 if __name__ == '__main__':

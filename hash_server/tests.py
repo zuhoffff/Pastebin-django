@@ -17,7 +17,7 @@ def test_hash_gen():
     from setup_db import Hashes
     from setup_db import MySession
     
-    newDbWizard = HashDbWizard(Session = MySession, db_model=Hashes)
+    newDbWizard = HashDbWizard(session_factory = MySession, db_model=Hashes)
     newHashGenerator = HashGenerator(newDbWizard)
     newHashGenerator.ensure_spare_hashes()
 
