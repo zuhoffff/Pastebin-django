@@ -35,9 +35,11 @@ TODO: store s3 credentials in safer way
 - Unique URLs generation.
 - Implementation of multithreading (Todo).
 Design ideas:
-1. add new hash to db every time its used
-2. check for the amount of spare hashes every N time
-3. restore number of spare hashes everytime server is free of requests (if they arrive continuously, check handle cases when get_hash has no hash to return).
+1. check for the amount of spare hashes every N time
+1. restore number of spare hashes everytime server is free of requests (if they arrive continuously, check handle cases when get_hash has no hash to return).
+
+Alternative simplified design:
+1. instantly refill db with a new hash every time its used
 
 ## Redis:
 - Redis stores just the most popular pastes.
