@@ -16,11 +16,11 @@ DB_URL = (f'postgresql://{db_user}:{db_pass}@{db_host}/{db_name}')
 TEST_DB_URL = f'postgresql://postgres:postgres@localhost/hashes'
 
 Base = declarative_base()
-engine = create_engine(TEST_DB_URL)
+engine = create_engine(TEST_DB_URL, pool_size=20, max_overflow=0)
 session_factory = sessionmaker(bind=engine)
+# Thread local session
+thread_safe_session_factory = scoped_session(session_factory)
 
-# Use thread-local sessions
-MySession = scoped_session(session_factory)
 
 # Define the Hash model
 class Hashes(Base):

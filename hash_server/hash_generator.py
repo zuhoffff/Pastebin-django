@@ -16,8 +16,9 @@ class HashGenerator:
     def ensure_spare_hashes(self):
         current_unused = self.hash_db_wizard.count_unused_hashes()
         needed_amount=(self.spare_hashes_plank-current_unused)
-        self.hash_db_wizard.insert_new_hashes(amount=needed_amount)
-        logger.info(f'Added {needed_amount} hashes to db')
+        if needed_amount > 0:
+            self.hash_db_wizard.insert_new_hashes(amount=needed_amount)
+            logger.info(f'Added {needed_amount} hashes to db')
 
     # Get the next unused hash
     def get_next_unused_hash(self):
