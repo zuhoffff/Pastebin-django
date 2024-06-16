@@ -1,7 +1,8 @@
 import requests
 import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
-def make_singe_request():
+def make_single_request():
     try:
         response = requests.get('http://localhost:8000')
         if response.status_code == 200:
@@ -11,19 +12,18 @@ def make_singe_request():
     except Exception as e:
         print(f"An error occurred: {e}")
 
-def test_hash_gen():
-    from hash_generator import HashGenerator
-    from hashDbWizard import HashDbWizard
-    from setup_db import Hashes
-    from setup_db import MySession
-    
-    newDbWizard = HashDbWizard(session_factory = MySession, db_model=Hashes)
-    newHashGenerator = HashGenerator(newDbWizard)
-    newHashGenerator.ensure_spare_hashes()
+def main():
+    num_requests = 1000
+    num_workers = 100  # Number of threads to use for making requests
 
-    print(newHashGenerator.get_next_unused_hash())
+    with ThreadPoolExecutor(max_workers=num_workers) as executor:
+        futures = [executor.submit(make_single_request) for _ in range(num_requests)]
+
+        for future in as_completed(futures):
+            try:
+                future.result()
+            except Exception as e:
+                print(f"Request generated an exception: {e}")
 
 if __name__ == '__main__':
-    for i in range(1000):
-        make_singe_request()
-        time.sleep(0.5)
+    main()

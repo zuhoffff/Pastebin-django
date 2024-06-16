@@ -5,8 +5,7 @@ from botocore.exceptions import NoCredentialsError, PartialCredentialsError, Cli
 from decouple import config
 
 # set up the logs
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 class S3Service():
     # Constants for error messages
@@ -20,24 +19,26 @@ class S3Service():
                 aws_secret_access_key=aws_secret_access_key)
         self.bucket_name = bucket_name
 
-    def check_connectivity(self):
+    def check_s3_connection(self):
         try:
             self.s3_client.list_buckets()
+            logger.info('s3 connected')
         except ClientError:
+            logger.error('s3 client error')
             raise
             
     def upload_to_s3(self, s3_key, text_input):
         try:
             self.s3_client.put_object(Bucket=self.bucket_name, Key=str(s3_key), Body=str(text_input))
-            LOGGER.info('Object uploaded to S3')
+            logger.info('Object uploaded to S3')
         except (NoCredentialsError, PartialCredentialsError) as e:
-            LOGGER.error(f'{self.__class__.ERROR_CREDENTIALS}: {e}')
+            logger.error(f'{self.__class__.ERROR_CREDENTIALS}: {e}')
             raise
         except ClientError as e:
-            LOGGER.error(f'{self.__class__.ERROR_CLIENT}: {e}')
+            logger.error(f'{self.__class__.ERROR_CLIENT}: {e}')
             raise
         except Exception as e:
-            LOGGER.error(f'{self.__class__.ERROR_GENERIC}: {e}')
+            logger.error(f'{self.__class__.ERROR_GENERIC}: {e}')
             raise
 
     def retrieve_from_s3(self, s3_key):
@@ -46,11 +47,11 @@ class S3Service():
 
     def delete_from_s3(self, s3_key):
         self.s3_client.delete_object(Bucket=self.bucket_name, Key=s3_key)
-        LOGGER.info('Object deleted')
+        logger.info('Object deleted from s3')
 
 key_id = config('aws_access_key_id')
 secret_key = config('aws_secret_access_key')
 BUCKET_NAME=config('BUCKET_NAME')
 
 myS3Service = S3Service(key_id, secret_key, BUCKET_NAME)
-myS3Service.check_connectivity()
+myS3Service.check_s3_connection()
