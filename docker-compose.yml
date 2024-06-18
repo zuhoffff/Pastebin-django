@@ -1,0 +1,90 @@
+version: '3.9'
+
+services:
+# MAIN APP
+  metadata-db:
+    image: postgres:13
+    environment:
+      POSTGRES_DB: metadata
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - metadata_postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  web:
+    build: 
+      context: ./main_app
+    environment:
+      BUCKET_NAME: my-pastebin-bucket
+      POSTGRES_DB: metadata
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_HOST: metadata-db
+      POSTGRES_PORT: 5432
+      HASH_SERVER_URI: http://hash-server:8000/
+    env_file:
+      - .env
+    ports:
+      - "5000:5000"
+    depends_on:
+      - metadata-db
+    image: pastebin/web:latest
+
+  metadata_pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    depends_on:
+      - metadata-db
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+
+# the hash server
+  hash-db:
+    image: postgres:13
+    environment:
+      POSTGRES_DB: hashes
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - hash_postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+
+  hash-server:
+    build:
+      context: ./hash_server
+    environment:
+      POSTGRES_DB: hashes
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_HOST: hash-db
+      POSTGRES_PORT: 5432
+    ports:
+      - "8000:8000"
+    depends_on:
+      - hash-db
+    image: pastebin/hash-server:latest
+
+  hash_pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5051:80"
+    depends_on:
+      - hash-db
+
+
+volumes:
+  metadata_postgres_data:
+  hash_postgres_data:
