@@ -3,8 +3,6 @@ from django.views.generic import TemplateView, FormView
 from .slugForm import SlugForm
 from django.shortcuts import redirect
 
-# TODO: make response for cases when a text-paste is not present in storeage
-
 class HomePage(FormView):
     template_name = 'home.html'
     form_class = SlugForm
