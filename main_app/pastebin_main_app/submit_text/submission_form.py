@@ -15,7 +15,7 @@ class PasteSubmissionForm(forms.ModelForm):
 
     class Meta:
         model = Metadata
-        fields = ['author','expiry_time']
+        fields = ['author','expiry_time','name']
         widgets = {
             'expiry_time': forms.DateTimeInput(attrs={'class': 'flatpickr'},
                                                format='%Y-%m-%dT%H:%M')
