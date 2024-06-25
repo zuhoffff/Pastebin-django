@@ -1,6 +1,6 @@
 from django.http import HttpResponse, JsonResponse
 from django.views.generic import TemplateView, FormView
-from .slugForm import SlugForm
+from .slug_form import SlugForm
 from django.shortcuts import redirect
 
 class HomePage(FormView):

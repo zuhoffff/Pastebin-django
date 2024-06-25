@@ -42,9 +42,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-
     # my apps:
-    'pastebin_main_app.apps.PastebinMainAppConfig'
+    'pastebin_main_app'
 ]
 
 MIDDLEWARE = [
@@ -80,17 +79,19 @@ WSGI_APPLICATION = 'pastebin.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-from os import environ
-
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': environ.get('POSTGRES_DB', 'metadata'),
-        'USER': environ.get('POSTGRES_USER', 'postgres'),
-        'PASSWORD': environ.get('POSTGRES_PASSWORD', 'postgres'),
-        'HOST': environ.get('POSTGRES_HOST', 'metadata_db'),
-        'PORT': environ.get('POSTGRES_PORT', '5432'),
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': ':memory:',  # In-memory SQLite database
     }
+    # 'default': {
+    #     'ENGINE': 'django.db.backends.postgresql',
+    #     'NAME': environ.get('POSTGRES_DB', 'metadata'),
+    #     'USER': environ.get('POSTGRES_USER', 'postgres'),
+    #     'PASSWORD': environ.get('POSTGRES_PASSWORD', 'postgres'),
+    #     'HOST': environ.get('POSTGRES_HOST', 'metadata_db'),
+    #     'PORT': environ.get('POSTGRES_PORT', '5432'),
+    # }
 }
 
 CACHES = {
