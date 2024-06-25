@@ -35,9 +35,9 @@ document.getElementById('slugForm').addEventListener('submit', function(event) {
         if (data.prompt_again) {
             // Display an error message if the password is incorrect
             document.getElementById('message').innerHTML = '<p class="error">Text-paste with such id does not exist</p>';
-        } else {
-            // If password is correct, reload the page or redirect as needed
-            window.location.reload();
+        } else if (data.redirect_url) {
+            // Redirect to the specified URL
+            window.location.href = data.redirect_url;
         }
     })
     .catch(error => {
