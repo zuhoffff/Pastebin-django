@@ -1,8 +1,8 @@
 document.addEventListener('DOMContentLoaded', (event) => {
-    console.log('JavaScript loaded and running'); // Debug line
+    console.log('JavaScript loaded and running');
 
     document.getElementById('passwordForm').addEventListener('submit', function(event) {
-        event.preventDefault(); // Prevent default form submission
+        event.preventDefault();
 
         const form = event.target;
         const formData = new FormData(form);
@@ -14,15 +14,13 @@ document.addEventListener('DOMContentLoaded', (event) => {
         .then(response => response.json())
         .then(data => {
             if (data.prompt_again) {
-                // Display an error message if the password is incorrect
                 document.getElementById('message').innerHTML = '<p class="error">Invalid password</p>';
-            } else {
-                // If password is correct, reload the page or redirect as needed
-                window.location.reload();
+            } else if (data.redirect_url) {
+                // Redirect to the specified URL
+                window.location.href = data.redirect_url;
             }
         })
         .catch(error => {
-            // Display an error message if there was an issue with the request
             document.getElementById('message').innerHTML = '<p class="error">Error: ' + error.message + '</p>';
         });
     });

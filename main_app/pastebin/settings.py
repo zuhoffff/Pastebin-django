@@ -43,7 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     # my apps:
-    'pastebin_main_app'
+    'pastebin_main_app.apps.PastebinMainAppConfig'
 ]
 
 MIDDLEWARE = [
@@ -80,10 +80,6 @@ WSGI_APPLICATION = 'pastebin.wsgi.application'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
 DATABASES = {
-    # 'default': {
-    #     'ENGINE': 'django.db.backends.sqlite3',
-    #     'NAME': ':memory:',  # In-memory SQLite database
-    # }
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': environ.get('POSTGRES_DB', 'metadata'),
@@ -91,6 +87,10 @@ DATABASES = {
         'PASSWORD': environ.get('POSTGRES_PASSWORD', 'postgres'),
         'HOST': environ.get('POSTGRES_HOST', 'metadata-db'),
         'PORT': environ.get('POSTGRES_PORT', '5432'),
+    },
+    'test': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': ':memory:',  # In-memory SQLite database
     }
 }
 
@@ -159,28 +159,37 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 APPEND_SLASH=False
 
-LOGGING = {
-    "version": 1,
-    "disable_existing_loggers": False,
-    "formatters": {
-        "verbose": {
-            "format" : "%(levelname)s %(asctime)s %(module)s %(process)s %(thread)s %(message)s"
-        }
-    },
-    "handlers": {
-        "console": {
-            "class": "logging.StreamHandler",
-        },
-    },
-    "root": {
-        "handlers": ["console"],
-        "level": "WARNING",
-    },
-    "loggers": {
-        "django": {
-            "handlers": ["console"],
-            "level": getenv("DJANGO_LOG_LEVEL", "INFO"),
-            "propagate": False,
-        },
-    },
-}
+# LOGGING = {
+#     "version": 1,
+#     "disable_existing_loggers": False,
+#     "formatters": {
+#         "verbose": {
+#             "format" : "%(levelname)s %(asctime)s %(module)s %(process)s %(thread)s %(message)s"
+#         },
+#         "simple": {
+#             "format": "%(levelname)s %(message)s"
+#         },
+#     },
+#     "handlers": {
+#         "console": {
+#             "class": "logging.StreamHandler",
+#             "formatter": "verbose",
+#         },
+#     },
+#     "root": {
+#         "handlers": ["console"],
+#         "level": "WARNING",
+#     },
+#     "loggers": {
+#         "django": {
+#             "handlers": ["console"],
+#             "level": getenv("DJANGO_LOG_LEVEL", "INFO"),
+#             "propagate": False,
+#         },
+#         "__main__": {
+#             "handlers": ["console"],
+#             "level": getenv("DJANGO_LOG_LEVEL", "INFO"),
+#             "propagate": True,
+#         },
+#     },
+# }
