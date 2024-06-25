@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Home - Pastebin{% endblock %}
+
+{% block stylesheets %}
+<!-- <link rel="stylesheet" href="{% static 'home.css' %}"> -->
+{% endblock %}
+
+{% block content %}
+<h1> Metadata List </h1>
+<ul>
+    {% for metadata in metadatas %}
+        <li>{{ metadata }}</li>
+    {% endfor %}
+</ul>
+{% endblock %}
