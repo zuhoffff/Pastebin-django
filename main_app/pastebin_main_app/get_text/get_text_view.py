@@ -10,7 +10,6 @@ from django.contrib.auth.hashers import check_password
 from django.forms.models import model_to_dict
 from django.urls import reverse
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 class CheckProtection(View):
@@ -50,7 +49,6 @@ class PasswordPromptView(View):
             return JsonResponse({'prompt_again': True})
 
 class PasteDetailView(View):
-    logger.info('redirected!')
     model = Metadata
     cache_timeout = 300
     payload = {}
