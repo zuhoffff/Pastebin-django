@@ -55,6 +55,8 @@ class SubmitTextView(CreateView):
         logger.debug(f"user_agent: {new_entry.user_agent} (type: {type(new_entry.user_agent)})")
         logger.debug(f"slug: {new_entry.slug} (type: {type(new_entry.slug)})")
         logger.debug(f"password: {new_entry.password} (type: {type(new_entry.password)})")
+        logger.debug(f"author: {new_entry.author} (type: {type(new_entry.author)})")
+        logger.debug(f"name: {new_entry.name} (type: {type(new_entry.name)})")
 
         new_entry.save()
 

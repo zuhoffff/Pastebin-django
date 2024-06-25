@@ -8,6 +8,7 @@ class Metadata(models.Model):
     author = models.CharField(max_length=30, unique=False, null=False, default='Anonymous') # Optional
     expiry_time=models.DateTimeField(unique=False, null=False)
     password=models.CharField(max_length=150, unique=False, null=True)
+    name=models.CharField(max_length=20,unique=False,default='Untitled')
 
     def __str__(self):
         return self.slug

@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
 from pathlib import Path
-import os
+from os import environ, getenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -80,18 +80,18 @@ WSGI_APPLICATION = 'pastebin.wsgi.application'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': ':memory:',  # In-memory SQLite database
-    }
     # 'default': {
-    #     'ENGINE': 'django.db.backends.postgresql',
-    #     'NAME': environ.get('POSTGRES_DB', 'metadata'),
-    #     'USER': environ.get('POSTGRES_USER', 'postgres'),
-    #     'PASSWORD': environ.get('POSTGRES_PASSWORD', 'postgres'),
-    #     'HOST': environ.get('POSTGRES_HOST', 'metadata_db'),
-    #     'PORT': environ.get('POSTGRES_PORT', '5432'),
+    #     'ENGINE': 'django.db.backends.sqlite3',
+    #     'NAME': ':memory:',  # In-memory SQLite database
     # }
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': environ.get('POSTGRES_DB', 'metadata'),
+        'USER': environ.get('POSTGRES_USER', 'postgres'),
+        'PASSWORD': environ.get('POSTGRES_PASSWORD', 'postgres'),
+        'HOST': environ.get('POSTGRES_HOST', 'metadata-db'),
+        'PORT': environ.get('POSTGRES_PORT', '5432'),
+    }
 }
 
 CACHES = {
@@ -179,7 +179,7 @@ LOGGING = {
     "loggers": {
         "django": {
             "handlers": ["console"],
-            "level": os.getenv("DJANGO_LOG_LEVEL", "INFO"),
+            "level": getenv("DJANGO_LOG_LEVEL", "INFO"),
             "propagate": False,
         },
     },

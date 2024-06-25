@@ -1,7 +1,7 @@
 from django.http.response import HttpResponse, JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.hashers import check_password
-from ..models import Metadata
+from pastebin_main_app.models import Metadata
 from django.core.cache import cache
 import logging
 from pastebin_main_app.utils.s3_handler import myS3Service
