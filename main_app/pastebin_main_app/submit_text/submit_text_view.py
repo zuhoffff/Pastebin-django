@@ -1,16 +1,16 @@
+from pastebin_main_app.submit_text.submission_form import PasteSubmissionForm
 from django.contrib.auth.hashers import make_password
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse, JsonResponse
 from django.views.generic.edit import CreateView
 from django.db.models.base import Model as Model
-from .submition_form import PasteSubmissionForm
+from pastebin_main_app.models import Metadata
 from django.shortcuts import HttpResponse
 from datetime import datetime, timezone
-from ..models import Metadata
-from ..utils.expiry_controller import myExpController
-from .submit_text_service import submitTextService
-from ..utils.s3_handler import myS3Service
+from pastebin_main_app.submit_text.submit_text_service import submitTextService
+from pastebin_main_app.utils.expiry_controller import myExpController
+from pastebin_main_app.utils.s3_handler import myS3Service
 import logging
 
 logger = logging.getLogger(__name__)

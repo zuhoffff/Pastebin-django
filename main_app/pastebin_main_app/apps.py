@@ -1,6 +1,6 @@
 from django.apps import AppConfig
 from threading import Thread
-from .utils.myUtilFunctions import delete_expired_entry_by_id
+from .utils.my_util_functions import delete_expired_entry_by_id
 from .utils.expiry_controller import ExpiryController 
 
 newExpiryController = ExpiryController(delete_expired_entry_by_id)

@@ -1,6 +1,5 @@
 import boto3
 import logging
-from os import environ
 from botocore.exceptions import NoCredentialsError, PartialCredentialsError, ClientError
 from decouple import config
 
@@ -49,9 +48,9 @@ class S3Service():
         self.s3_client.delete_object(Bucket=self.bucket_name, Key=s3_key)
         logger.info('Object deleted from s3')
 
-key_id = config('aws_access_key_id')
-secret_key = config('aws_secret_access_key')
-BUCKET_NAME=config('BUCKET_NAME')
+key_id = config('aws_access_key_id', default='none')
+secret_key = config('aws_secret_access_key', default = 'none')
+BUCKET_NAME=config('BUCKET_NAME',default= 'my_pastebin_bucket')
 
 myS3Service = S3Service(key_id, secret_key, BUCKET_NAME)
 myS3Service.check_s3_connection()
