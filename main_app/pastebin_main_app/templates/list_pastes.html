@@ -1,17 +1,42 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Home - Pastebin{% endblock %}
+{% block title %}List of Pastes{% endblock %}
 
 {% block stylesheets %}
-<!-- <link rel="stylesheet" href="{% static 'home.css' %}"> -->
+<!-- Include DataTables CSS and JS for better table representation -->
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.21/css/jquery.dataTables.css">
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.js"></script>
+<script src="https://code.jquery.com/jquery-3.5.1.js"></script>
 {% endblock %}
 
 {% block content %}
-<h1> Metadata List </h1>
-<ul>
-    {% for metadata in metadatas %}
-        <li>{{ metadata }}</li>
-    {% endfor %}
-</ul>
+<h1>List of Pastes</h1>
+<table id="metadata-table" class="display">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Slug</th>
+            <th>Author</th>
+            <th>Timestamp</th>
+            <th>Expiry Time</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for metadata in metadatas %}
+        <tr>
+            <td>{{ metadata.name }}</td>
+            <td>{{ metadata.slug }}</td>
+            <td>{{ metadata.author }}</td>
+            <td>{{ metadata.timestamp }}</td>
+            <td>{{ metadata.expiry_time }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<script>
+    $(document).ready(function() {
+        $('#metadata-table').DataTable();
+    });
+</script>
 {% endblock %}
