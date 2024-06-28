@@ -3,7 +3,7 @@ from pastebin_main_app.submit_text.submit_text_view import SubmitTextView
 from pastebin_main_app.get_text.get_text_view import PasswordPromptView, PasteDetailView, CheckProtection
 from pastebin_main_app.homepage.home_view import HomePage
 from pastebin_main_app.list_pastes.list_pastes_view import ListPastes
-
+#TODO: fix: browser sometimes does not pull newer version of front-end code
 urlpatterns = [
     path('/', HomePage.as_view(), name='home'),
     path('', HomePage.as_view(), name='home'),

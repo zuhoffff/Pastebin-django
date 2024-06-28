@@ -1,5 +1,4 @@
 /* base.css */
-
 /* Reset basic elements for consistent styling across browsers */
 body, h1, p, form, input, button, div {
     margin: 0;
@@ -12,12 +11,12 @@ body, h1, p, form, input, button, div {
 body {
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start; /* Allow content to push down */
     align-items: center;
     min-height: 100vh;
-    background: linear-gradient(135deg, #ff7e5f, #feb47b);
+    background: linear-gradient(135deg, #8777cb, #feb47b);
     padding: 1rem;
-    overflow: hidden; /* Prevent scrolling */
+    overflow-x: hidden; /* Only hide horizontal overflow */
 }
 
 /* Style the main content area */
