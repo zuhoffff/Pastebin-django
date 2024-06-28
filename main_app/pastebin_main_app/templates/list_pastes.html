@@ -35,10 +35,18 @@
             </tr>
         </thead>
         <tbody>
+            <!-- TODO: add hyperlink to navigate to each paste -->
+            <!-- TODO: mark pastes as public and protected -->
             {% for metadata in metadatas %}
             <tr>
                 {% for key, value in metadata.items %}
-                    <td>{{ value }}</td>
+                    {% if key == "slug" %}
+                        <td>
+                            <a href="{% url 'check_protection' value %}">{{value}}</a>
+                        </td>
+                    {%else%}
+                        <td>{{ value }}</td>
+                    {% endif %}
                 {% endfor %}
             </tr>
             {% endfor %}
