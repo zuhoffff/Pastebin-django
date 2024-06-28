@@ -20,7 +20,7 @@ class ListPastes(ListView):
     def get_queryset(self):
         self.fields = ['name', 'slug', 'author', 'timestamp', 'expiry_time']
         queryset = self.model.objects.values(*self.fields)
-        logger.info(list(queryset))
+        logger.debug(list(queryset))
         return queryset
 
     def get_context_data(self, **kwargs):
