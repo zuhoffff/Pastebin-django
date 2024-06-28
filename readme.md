@@ -46,7 +46,6 @@ Design:
 - Cache popular pastes (optional).
 
 ## 7. Another feature:
-1. TODO: User can navigate to the list of all public pastes.
+ User can navigate to the list of all pastes.
 
 #### TODO: create more tests.
-#### TODO: allow naming of pastes and access by name
