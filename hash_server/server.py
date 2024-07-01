@@ -8,6 +8,8 @@ import threading
 from hash_generator import HashGenerator
 from hashDbWizard import HashDbWizard
 from setup_db import Hashes, session_factory
+from pyinstrument import Profiler
+profiler=Profiler()
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -32,7 +34,11 @@ class Handler(BaseHTTPRequestHandler):
         self.send_header('content-type', 'application/json')
         self.end_headers()
         try:
+            profiler.start()
             hash_key = self.localHashGenerator.get_next_unused_hash()
+            profiler.stop()
+            logger.debug(profiler.output_text(unicode=True, color=True))
+
             response = json.dumps({'hash': hash_key}).encode()
         except Exception as e:
             logger.error(f'Could not fetch hash from hash generator: {e}')
@@ -63,7 +69,10 @@ class HashServer:
             active_threads = threading.active_count() - 2
             if active_threads <= 1:
                 logger.info(f'Active threads count: {active_threads}')
+                profiler.start()
                 self.hash_generator.ensure_spare_hashes()
+                profiler.stop()
+                logger.debug(profiler.output_text(unicode=True, color=True))
             time.sleep(self.time_to_check)
 
     def _create_spare_hashes_provider_thread(self):

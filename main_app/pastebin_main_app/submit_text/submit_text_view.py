@@ -12,7 +12,8 @@ from pastebin_main_app.submit_text.submit_text_service import submitTextService
 from pastebin_main_app.utils.expiry_controller import myExpController
 from pastebin_main_app.utils.s3_handler import myS3Service
 import logging
-
+# from pyinstrument import Profiler
+# profiler = Profiler()
 logger = logging.getLogger(__name__)
 
 @method_decorator(csrf_exempt, name='dispatch')
