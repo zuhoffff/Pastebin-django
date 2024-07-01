@@ -7,19 +7,6 @@ body, h1, p, form, input, button, div {
     font-family: 'Arial', sans-serif;
 }
 
-/* Set a background gradient for the body */
-/* body {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    background: linear-gradient(135deg, #ff7e5f, #feb47b);
-    padding: 1rem;
-    animation: backgroundGradient 15s ease infinite;
-    overflow: hidden; /* Prevent scrolling */
-} */
-
 /* Keyframes for background gradient animation */
 @keyframes backgroundGradient {
     0%, 100% {

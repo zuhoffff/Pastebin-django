@@ -139,10 +139,11 @@ USE_I18N = True
 USE_TZ = True
 
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.0/howto/static-files/
+import os
 
 STATIC_URL = 'static/'
+PROJECT_DIR = '/main_app'
+STATIC_ROOT = os.path.join(PROJECT_DIR, 'static')
 
 # # Add these lines if you have additional static files outside apps' static directories
 # STATICFILES_DIRS = [
@@ -193,3 +194,6 @@ APPEND_SLASH=False
 #         },
 #     },
 # }
+
+# settings.py
+STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.ManifestStaticFilesStorage'
