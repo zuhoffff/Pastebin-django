@@ -21,6 +21,8 @@ document.addEventListener("DOMContentLoaded", function() {
 
         const form = event.target;
         const formData = new FormData(form);
+        let timezoneField = form.elements['timezone'];
+        timezoneField.value = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
         // Submit form data using Fetch API
         fetch(form.action, {
