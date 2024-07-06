@@ -12,7 +12,7 @@ document.addEventListener("DOMContentLoaded", function() {
         minDate: "today",
         altInput: true,
         altFormat: "F j, Y H:i",
-        allowInput: true
+        allowInput: true,
     });
 
     // Handle form submission
@@ -21,8 +21,10 @@ document.addEventListener("DOMContentLoaded", function() {
 
         const form = event.target;
         const formData = new FormData(form);
-        let timezoneField = form.elements['timezone'];
-        timezoneField.value = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        formData.append('timezone', timezone);
+        // let timezoneField = form.elements['timezone'];
+        // timezoneField.value = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
         // Submit form data using Fetch API
         fetch(form.action, {

@@ -4,6 +4,7 @@ from pastebin_main_app.utils.my_util_functions import insert_to_sorted_list_retu
 from typing import Callable
 import logging
 
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 class ExpiryController:
@@ -40,7 +41,7 @@ class ExpiryController:
         """
         new_event = (expiry_time, id)
         insertion_point = insert_to_sorted_list_returning_position(self.expiry_registry, new_event)
-        logger.info(f'Expiry time added {expiry_time} -- {id}')
+        logger.info(f'Expiry time added {expiry_time} -- {str(id)}')
 
         if insertion_point == 0:
             self.expiry_event.set()
@@ -54,8 +55,8 @@ class ExpiryController:
                 logger.info('Waiting for new events')
                 continue
 
-            current_time = int(datetime.now().timestamp())
-            logger.info(f'Current time: {current_time}')
+            current_time = int(datetime.utcnow().timestamp())
+            logger.info(current_time)
 
             time_til_next_expiry = self.expiry_registry[0][0] - current_time
             logger.info(f'Time until next expiry: {time_til_next_expiry}')

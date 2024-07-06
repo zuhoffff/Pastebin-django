@@ -12,8 +12,12 @@ from pastebin_main_app.submit_text.submit_text_service import submitTextService
 from pastebin_main_app.utils.expiry_controller import myExpController
 from pastebin_main_app.utils.s3_handler import myS3Service
 import logging
+import pytz
+from django.utils.timezone import make_aware, make_naive
+
 # from pyinstrument import Profiler
 # profiler = Profiler()
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
@@ -39,11 +43,20 @@ class SubmitTextView(CreateView):
         text = form_data.get('text')
         password = form_data.get('password')
         expiry_time = form_data.get('expiry_time')
+        user_timezone = self.request.POST.get('timezone', 'UTC')
+
+        user_tz = pytz.timezone(user_timezone)
+        naive_expiry_time = make_naive(expiry_time, pytz.UTC)
+        # Localize to user's timezone
+        localized_expiry_time = user_tz.localize(naive_expiry_time)
+        utc_expiry_time = localized_expiry_time.astimezone(pytz.UTC)
+
+        logger.info(f"tz: {user_tz} timezone: {user_timezone} utc: {utc_expiry_time}")
 
         timestamp = datetime.now(timezone.utc)
 
         # Calculate the int utc epoch expiry time to add to expiry registry
-        epoch_expiry_time = self.submit_text_service.convert_datetime_to_utc_timestamp(expiry_time)
+        epoch_expiry_time = int(utc_expiry_time.timestamp())
         self.expiry_controller.add_event(epoch_expiry_time, self.__class__.model.id)        
         
         # Get timestamp and user agent from the request metadata
@@ -54,6 +67,7 @@ class SubmitTextView(CreateView):
 
         # Process the validated form data but don't save to the database yet
         new_entry = form.save(commit=False) 
+        new_entry.expity_time = utc_expiry_time
         if password: new_entry.password = make_password(password)
         new_entry.user_agent = user_agent
         new_entry.timestamp = timestamp
