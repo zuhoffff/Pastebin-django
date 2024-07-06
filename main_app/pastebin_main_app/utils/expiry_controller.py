@@ -1,10 +1,10 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from threading import Thread, Event
 from pastebin_main_app.utils.my_util_functions import insert_to_sorted_list_returning_position
 from typing import Callable
 import logging
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 class ExpiryController:
@@ -41,24 +41,25 @@ class ExpiryController:
         """
         new_event = (expiry_time, id)
         insertion_point = insert_to_sorted_list_returning_position(self.expiry_registry, new_event)
-        logger.info(f'Expiry time added {expiry_time} -- {str(id)}')
+        logger.info(f'Expiry time added {expiry_time} registry: {self.expiry_registry}')
 
         if insertion_point == 0:
             self.expiry_event.set()
 
     def run_expiry_controller(self):
         logger.info('expiry controller started')
-        while self.run_continuously:
+        while True:
             if not self.expiry_registry:
                 self.expiry_event.wait()
                 self.expiry_event.clear()
                 logger.info('Waiting for new events')
                 continue
+            
+            current_time=datetime.now(timezone.utc)
+            current_timestamp = int(current_time.timestamp())
+            logger.info(f'current time: {current_time}')
 
-            current_time = int(datetime.utcnow().timestamp())
-            logger.info(current_time)
-
-            time_til_next_expiry = self.expiry_registry[0][0] - current_time
+            time_til_next_expiry = self.expiry_registry[0][0] - current_timestamp
             logger.info(f'Time until next expiry: {time_til_next_expiry}')
 
             if time_til_next_expiry <= 0:

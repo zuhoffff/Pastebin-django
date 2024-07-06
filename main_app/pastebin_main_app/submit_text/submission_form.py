@@ -14,14 +14,15 @@ class PasteSubmissionForm(forms.ModelForm):
     text = forms.CharField(max_length=10000, required=True)
     password = forms.CharField(max_length=150, required=False, widget=forms.PasswordInput())
     # timezone = forms.CharField(widget=forms.HiddenInput())
+    expiry_time = forms.DateTimeField(
+        required=True,
+        widget=forms.DateTimeInput(attrs={'class': 'flatpickr', 'type': 'datetime-local'}),
+        input_formats=['%Y-%m-%dT%H:%M']
+    )
 
     class Meta:
         model = Metadata
-        fields = ['author','expiry_time','name']
-        widgets = {
-            'expiry_time': forms.DateTimeInput(attrs={'class': 'flatpickr'},
-                                               format='%Y-%m-%dT%H:%M')
-        }
+        fields = ['author','name']
     
     # def clean_expiry_time(self):
     #     expiry_time = self.cleaned_data.get('expiry_time')

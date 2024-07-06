@@ -17,7 +17,8 @@ from django.utils.timezone import make_aware, make_naive
 
 # from pyinstrument import Profiler
 # profiler = Profiler()
-logging.basicConfig(level=logging.INFO)
+# logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 
@@ -67,7 +68,7 @@ class SubmitTextView(CreateView):
 
         # Process the validated form data but don't save to the database yet
         new_entry = form.save(commit=False) 
-        new_entry.expity_time = utc_expiry_time
+        new_entry.expiry_time = utc_expiry_time
         if password: new_entry.password = make_password(password)
         new_entry.user_agent = user_agent
         new_entry.timestamp = timestamp

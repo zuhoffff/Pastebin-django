@@ -5,10 +5,6 @@
 
 {% block stylesheets %}
 <link rel="stylesheet" href="{% static 'view_paste.css' %}">
-    <!-- Include dayjs from a CDN -->
-<script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/dayjs@1/plugin/duration.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/dayjs@1/plugin/relativeTime.js"></script>
 {% endblock %}
 
 {% block content %}
@@ -24,19 +20,14 @@
 </div>
 <div class="footer">
     <a href="/">Create New Paste</a>
-    </div>
+</div>
 {% endblock %}
 
-<!-- var expiryTime = dayjs('{{ expiry_time|escapejs }}'); -->
 {% block scripts %}
 <script>
-    // Activate the duration and relativeTime plugins
-    dayjs.extend(dayjs_plugin_duration);
-    dayjs.extend(dayjs_plugin_relativeTime);
-
     window.onload = function () {
-        // Parse the expiry time passed from the backend
-        var expiryTime = dayjs('{{ expiry_time|escapejs }}');
+        // Parse the expiry time passed from the backend in UTC
+        var expiryTime = new Date('{{ expiry_time|escapejs }}').getTime(); // Convert to milliseconds since epoch
         var display = document.querySelector('#timer');
         updateTimer(expiryTime, display); // Initial call to set the time
         var intervalId = setInterval(function() {
@@ -45,19 +36,19 @@
     };
 
     function updateTimer(expiryTime, display, intervalId) {
-        var now = dayjs();
-        var remaining = expiryTime.diff(now, 'second'); // Calculate the remaining time in seconds
+        // Get the current time in UTC
+        var now = new Date().getTime(); // Get current time in milliseconds since epoch (UTC)
+        var remaining = expiryTime - now; // Calculate the remaining time in milliseconds
 
         if (remaining <= 0) {
             clearInterval(intervalId); // Stop the timer
             display.innerHTML = "00:00:00:00"; // Show expired
             showExpiredPage(); // Call function to display expired page
         } else {
-            var duration = dayjs.duration(remaining, 'seconds');
-            var days = duration.days().toString().padStart(2, '0');
-            var hours = duration.hours().toString().padStart(2, '0');
-            var minutes = duration.minutes().toString().padStart(2, '0');
-            var seconds = duration.seconds().toString().padStart(2, '0');
+            var days = Math.floor(remaining / (1000 * 60 * 60 * 24)).toString().padStart(2, '0');
+            var hours = Math.floor((remaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)).toString().padStart(2, '0');
+            var minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60)).toString().padStart(2, '0');
+            var seconds = Math.floor((remaining % (1000 * 60)) / 1000).toString().padStart(2, '0');
             display.innerHTML = `${days}:${hours}:${minutes}:${seconds}`;
         }
     }
