@@ -1,3 +1,4 @@
+/* General styles for the body and headings */
 body {
     padding: 20px;
     background-color: #f8f9fa;
@@ -8,6 +9,8 @@ h1 {
     text-align: center;
     color: #333;
 }
+
+/* View toggle button styles */
 .view-toggle {
     margin-bottom: 20px;
     text-align: center;
@@ -15,6 +18,8 @@ h1 {
 .view-toggle button {
     margin: 0 5px;
 }
+
+/* Card styles */
 .card {
     margin-bottom: 20px;
     border: 1px solid #e3e6f0;
@@ -25,6 +30,8 @@ h1 {
     transform: translateY(-5px);
     box-shadow: 0 0.4rem 1.75rem 0 rgba(58, 59, 69, 0.15);
 }
+
+/* Card header styles */
 .card-header {
     background-color: #4e73df;
     color: #fff;
@@ -33,9 +40,13 @@ h1 {
     border-bottom: 1px solid #e3e6f0;
     font-size: 1.25rem;
 }
+
+/* Card body styles */
 .card-body {
     padding: 1rem;
 }
+
+/* Field styles */
 .field {
     margin-bottom: 10px;
 }
@@ -43,6 +54,8 @@ h1 {
     font-weight: bold;
     color: #4e73df;
 }
+
+/* Link styles */
 .link {
     color: #1b6ec2;
     text-decoration: none;
@@ -50,6 +63,8 @@ h1 {
 .link:hover {
     text-decoration: underline;
 }
+
+/* List view styles */
 .list-view .card {
     height: auto;
 }
@@ -57,6 +72,8 @@ h1 {
     flex: 1 0 100%;
     max-width: 100%;
 }
+
+/* Grid view styles */
 .grid-view .card {
     height: 350px;
     overflow: hidden;
@@ -64,4 +81,28 @@ h1 {
 .grid-view .col-lg-4, .grid-view .col-md-12 {
     flex: 1 0 33.333%;
     max-width: 33.333%;
+}
+
+/* Badge styles for statuses */
+.badge {
+    padding: 0.5em 0.75em;
+    font-size: 0.9rem;
+    border-radius: 0.35rem;
+}
+
+/* Specific badge styles */
+.badge-info {
+    color: #fff;
+}
+
+/* Public badge styling */
+.badge-public {
+    background-color: #28a745; /* Green */
+    color: #fff;
+}
+
+/* Private badge styling */
+.badge-private {
+    background-color: #fd7e14; /* Orange */
+    color: #fff;
 }

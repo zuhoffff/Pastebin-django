@@ -21,11 +21,10 @@
         <div class="col-md-12 col-lg-4">
             <div class="card">
                 <div class="card-header">
-                    {% for key, value in metadata.items %}
-                        {% if key == "name" %}
-                            {{ value }}
-                        {% endif %}
-                    {% endfor %}
+                    {{ metadata.name }} 
+                    <span class="badge {% if metadata.is_protected == 'private' %}badge-private{% else %}badge-public{% endif %} float-right">
+                        {{ metadata.is_protected }}
+                    </span>
                 </div>
                 <div class="card-body">
                     {% for key, value in metadata.items %}
@@ -35,10 +34,12 @@
                             <a class="link" href="{% url 'check_protection' value %}">{{ value }}</a>
                         </div>
                         {% elif key != "name" %}
-                        <div class="field">
-                            <span class="field-name">{{ key|capfirst }}:</span>
-                            <span>{{ value }}</span>
-                        </div>
+                            {% if key != "is_proteced" %}
+                            <div class="field">
+                                <span class="field-name">{{ key|capfirst }}:</span>
+                                <span>{{ value }}</span>
+                            </div>
+                            {% endif %}
                         {% endif %}
                     {% endfor %}
                 </div>
