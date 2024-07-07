@@ -24,43 +24,13 @@
 {% endblock %}
 
 {% block scripts %}
+<script src="{% static 'view_paste.js' %}"></script>
 <script>
     window.onload = function () {
-        // Parse the expiry time passed from the backend in UTC
-        var expiryTime = new Date('{{ expiry_time|escapejs }}').getTime(); // Convert to milliseconds since epoch
-        var display = document.querySelector('#timer');
-        updateTimer(expiryTime, display); // Initial call to set the time
-        var intervalId = setInterval(function() {
-            updateTimer(expiryTime, display, intervalId);
-        }, 1000);
+        // Pass expiry_time to the external JS file
+        var expiryTime = '{{ expiry_time|escapejs }}';
+        var homeurl = "{% url 'home' %}"
+        initializeTimer(expiryTime, homeurl);
     };
-
-    function updateTimer(expiryTime, display, intervalId) {
-        // Get the current time in UTC
-        var now = new Date().getTime(); // Get current time in milliseconds since epoch (UTC)
-        var remaining = expiryTime - now; // Calculate the remaining time in milliseconds
-
-        if (remaining <= 0) {
-            clearInterval(intervalId); // Stop the timer
-            display.innerHTML = "00:00:00:00"; // Show expired
-            showExpiredPage(); // Call function to display expired page
-        } else {
-            var days = Math.floor(remaining / (1000 * 60 * 60 * 24)).toString().padStart(2, '0');
-            var hours = Math.floor((remaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)).toString().padStart(2, '0');
-            var minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60)).toString().padStart(2, '0');
-            var seconds = Math.floor((remaining % (1000 * 60)) / 1000).toString().padStart(2, '0');
-            display.innerHTML = `${days}:${hours}:${minutes}:${seconds}`;
-        }
-    }
-
-    function showExpiredPage() {
-        document.body.innerHTML = `
-            <div class="container">
-                <h1>This Page Has Expired</h1>
-                <p>Sorry, the content you are trying to access has expired.</p>
-                <p>Please visit our <a href="{% url 'submit_text' %}">homepage</a>!</p>
-            </div>
-        `;
-    }
 </script>
 {% endblock %}
