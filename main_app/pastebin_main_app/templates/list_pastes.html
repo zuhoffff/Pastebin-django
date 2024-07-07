@@ -12,13 +12,35 @@
 {% block content %}
 <div class="container">
     <h1>List of Pastes</h1>
+
+    <!-- Filter and Sort Options -->
+    <div class="mb-3">
+        <label for="filter" class="mr-2">Show:</label>
+        <select id="filter" class="form-control mr-3 d-inline-block" style="width: auto;">
+            <option value="all">All</option>
+            <option value="public">Public Only</option>
+            <option value="private">Private Only</option>
+        </select>
+
+        <label for="sort" class="mr-2">Sort by:</label>
+        <select id="sort" class="form-control d-inline-block" style="width: auto;">
+            <option value="name">Name</option>
+            <option value="slug">Slug</option>
+            <option value="timestamp">Timestamp</option>
+            <option value="expiry_time">Expiry Time</option>
+        </select>
+    </div>
+
     <div class="view-toggle">
         <button id="list-view-btn" class="btn btn-primary">List View</button>
         <button id="grid-view-btn" class="btn btn-secondary">Grid View</button>
     </div>
+
     <div id="pastes-container" class="row list-view">
         {% for metadata in metadatas %}
-        <div class="col-md-12 col-lg-4">
+        <div class="col-md-12 col-lg-4 mb-4 paste-item" data-status="{{ metadata.is_protected }}" 
+             data-name="{{ metadata.name }}" data-slug="{{ metadata.slug }}" 
+             data-timestamp="{{ metadata.timestamp }}" data-expiry-time="{{ metadata.expiry_time }}">
             <div class="card">
                 <div class="card-header">
                     {{ metadata.name }} 
@@ -33,13 +55,11 @@
                             <span class="field-name">Link:</span>
                             <a class="link" href="{% url 'check_protection' value %}">{{ value }}</a>
                         </div>
-                        {% elif key != "name" %}
-                            {% if key != "is_proteced" %}
-                            <div class="field">
-                                <span class="field-name">{{ key|capfirst }}:</span>
-                                <span>{{ value }}</span>
-                            </div>
-                            {% endif %}
+                        {% elif key != "name" and key != "is_protected" %}
+                        <div class="field">
+                            <span class="field-name">{{ key|capfirst }}:</span>
+                            <span>{{ value }}</span>
+                        </div>
                         {% endif %}
                     {% endfor %}
                 </div>
@@ -48,17 +68,68 @@
         {% endfor %}
     </div>
 </div>
+
 <!-- Include jQuery -->
 <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
-<!-- Toggle View Script -->
+
+<!-- Client-Side Sorting and Filtering Script -->
 <script>
     $(document).ready(function() {
+        // Toggle View
         $('#list-view-btn').click(function() {
             $('#pastes-container').removeClass('grid-view').addClass('list-view');
         });
         $('#grid-view-btn').click(function() {
             $('#pastes-container').removeClass('list-view').addClass('grid-view');
         });
+
+        // Sorting and Filtering
+        $('#filter').change(function() {
+            filterPastes();
+        });
+
+        $('#sort').change(function() {
+            sortPastes();
+        });
+
+        function filterPastes() {
+            var filterValue = $('#filter').val();
+            $('.paste-item').each(function() {
+                var status = $(this).data('status');
+                if (filterValue === 'all' || status === filterValue) {
+                    $(this).show();
+                } else {
+                    $(this).hide();
+                }
+            });
+        }
+
+        function sortPastes() {
+            var sortValue = $('#sort').val();
+            var items = $('.paste-item').toArray();
+
+            items.sort(function(a, b) {
+                var aValue = $(a).data(sortValue);
+                var bValue = $(b).data(sortValue);
+
+                if (sortValue === 'timestamp' || sortValue === 'expiry_time') {
+                    // Parse datetime strings into JavaScript Date objects
+                    aValue = new Date(aValue);
+                    bValue = new Date(bValue);
+                }
+
+                if (aValue < bValue) return -1;
+                if (aValue > bValue) return 1;
+                return 0;
+            });
+
+            // Append sorted items back to the container
+            $('#pastes-container').html(items);
+        }
+
+        // Initial sort and filter
+        sortPastes();
+        filterPastes();
     });
 </script>
 {% endblock %}
