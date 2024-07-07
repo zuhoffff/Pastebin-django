@@ -25,6 +25,8 @@ class CheckProtection(View):
             logger.info('Text paste is protected: redirecting')
             return redirect('paste_password_prompt', slug=slug)
         else:
+            # set the session flag
+            request.session[f'passed_protection_{slug}'] = True
             logger.info('Text paste is public: redirecting to content')
             return redirect('paste_detail_view', slug=slug)
 
@@ -42,7 +44,7 @@ class PasswordPromptView(View):
             logger.info('Password correct')
             # Set a session flag
             request.session[f'passed_protection_{slug}'] = True
-            logger.info(f"Session data: {request.session.items()}")
+            logger.debug(f"Session data: {request.session.items()}")
             return JsonResponse({'redirect_url': reverse('paste_detail_view', kwargs={'slug': slug})})
         else:
             logger.info('Bad password')

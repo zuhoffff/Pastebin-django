@@ -21,12 +21,7 @@ from django.utils.timezone import make_aware, make_naive
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
-
-# TODO: expiry time bugs sometimes (maybe problem related to UTC and timezones)
-# in submission form expiry_time "local" time is saved as "utc" time, and get written to db like that: this causes time bug
-
 # TODO: fix When user craetes a lot of pastes something goes wrong with password check (probably problem is related to check_protection view)
-# TODO: fix: sometimes unprotected pastes can not be accessed (require session flag)
 # TODO: fix logger
 
 @method_decorator(csrf_exempt, name='dispatch')

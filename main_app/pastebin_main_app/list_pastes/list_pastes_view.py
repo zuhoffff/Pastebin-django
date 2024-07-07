@@ -12,6 +12,10 @@ import logging
 logging.basicConfig(level=logging.INFO, format='%(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
+# TODO: show if pastes are public or private
+# TODO: add filters
+# TODO: update list in realtime when some pastes expire
+
 class ListPastes(ListView):
     model=Metadata
     template_name = 'list_pastes.html'
