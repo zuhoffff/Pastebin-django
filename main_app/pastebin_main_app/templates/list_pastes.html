@@ -157,6 +157,9 @@
     function updatePaginationButtons(hasPrevious, hasNext) {
         $('#previous-page').prop('disabled', !hasPrevious);
         $('#next-page').prop('disabled', !hasNext);
+
+        $('#previous-page').closest('.page-item').toggleClass('disabled', !hasPrevious);
+        $('#next-page').closest('.page-item').toggleClass('disabled', !hasNext);
     }
 </script>
 {% endblock %}

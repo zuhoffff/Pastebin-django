@@ -9,14 +9,16 @@ from django.core.paginator import Paginator
 logging.basicConfig(level=logging.INFO, format='%(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
  
-# TODO: optimize pagination
+# TODO: optimize pagination; use listview pagination tools (instead of sending attributes explicitly)
+# allow user choose pagination number.
+# TODO: add paging buttons to the top of the page
 
 # TODO: update list in realtime when some pastes expire
 # TODO: alternate the names of the labels (use expiry time instead of hardcode expiry_time)
 # TODO: make filtering visuals smoother
 
 class ListPastes(ListView):
-    paginate_by = 5
+    paginate_by = 10
     model=Metadata
     template_name = 'list_pastes.html'
     context_object_name = 'metadatas'
@@ -31,11 +33,6 @@ class ListPastes(ListView):
             )
         )
         return queryset
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['fields'] = self.fields + ['is_protected']
-        return context
     
     def get(self, request, *args, **kwargs):
         if request.headers.get('x-requested-with') == 'XMLHttpRequest':
