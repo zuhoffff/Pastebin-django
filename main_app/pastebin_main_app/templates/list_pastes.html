@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
-
+{% load custom_filters %}
 {% block title %}List of Pastes{% endblock %}
 
 {% block stylesheets %}
@@ -118,7 +118,8 @@
                 $('#pastes-container').html(response.html);
                 highlightSortedColumn(sort);
                 blinkEffect();
-                updatePaginationButtons(response.has_previous, response.has_next);
+                alert(response.context.page_obj.has_next)
+                updatePaginationButtons(response.context.page_obj.has_next, );
                 currentPage = response.current_page;
             }
         });

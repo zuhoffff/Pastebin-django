@@ -1,5 +1,6 @@
 {# templates/list_pastes_part.html #}
 {% for metadata in metadatas %}
+{% load custom_filters %}
 <div class="col-md-12 col-lg-4 mb-4">
     <div class="card">
         <div class="card-header">
@@ -16,7 +17,7 @@
             {% for key, value in metadata.items %}
                 {% if key != "name" and key != "is_protected" %}
                 <div class="field">
-                    <span class="field-name">{{ key|capfirst }}:</span>
+                    <span class="field-name">{{ key|replace_underscore|capfirst }}:</span>
                     <span>{{ value }}</span>
                 </div>
                 {% endif %}
