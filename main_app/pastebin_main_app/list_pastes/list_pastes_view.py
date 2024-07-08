@@ -7,18 +7,12 @@ from django.template.loader import render_to_string
 
 logging.basicConfig(level=logging.INFO, format='%(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
-
-
-# TODO: add filters; use server-side filtering because of difference of datetime formats.
-# if method is common get: render html : if method is ajax return just queryset 
-# TODO: add revert sorting option
+ 
 # TODO: add paging
 
 # TODO: update list in realtime when some pastes expire
 # TODO: alternate the names of the labels (use expiry time instead of hardcode expiry_time)
 # TODO: make filtering visuals smoother
-
-# TODO: get rid of apply button
 
 class ListPastes(ListView):
     model=Metadata

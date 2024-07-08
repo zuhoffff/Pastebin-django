@@ -30,11 +30,9 @@
             </select>
 
             <!-- Sort Order Button -->
-            <button type="button" id="sort-order-btn" data-order="desc" class = "down">
+            <button type="button" id="sort-order-btn" data-order="desc" class="down">
                 <i></i>
             </button>
-
-            <button type="button" class="btn btn-primary" onclick="applyFilterSort()">Apply</button>
         </form>
     </div>
 
@@ -46,6 +44,7 @@
     <div id="pastes-container" class="row list-view">
         <!-- Initial content will be loaded here by Django -->
         {% include 'list_pastes_part.html' %}
+    </div>
 </div>
 
 <!-- Include jQuery -->
@@ -62,20 +61,29 @@
         $('#grid-view-btn').click(function() {
             $('#pastes-container').removeClass('list-view').addClass('grid-view');
         });
-    
+
         $('#sort-order-btn').click(function() {
             toggleSortOrder();
         });
-        
+
+        // Add change event listeners to filter and sort selects
+        $('#filter').change(function() {
+            applyFilterSort();
+        });
+
+        $('#sort').change(function() {
+            applyFilterSort();
+        });
+
         // Apply initial sort and filter based on default values
         applyFilterSort();
     });
-    
+
     function applyFilterSort() {
         const filter = $('#filter').val();
         const sort = $('#sort').val();
         const order = $('#sort-order-btn').data('order');
-    
+
         $.ajax({
             url: '',
             data: {
@@ -90,26 +98,25 @@
             }
         });
     }
-    
+
     function toggleSortOrder() {
         const orderBtn = $('#sort-order-btn');
         const currentOrder = orderBtn.data('order');
-    
+
         if (currentOrder === 'asc') {
             orderBtn.data('order', 'desc');
-            orderBtn.removeClass('up').addClass('down')
-            
+            orderBtn.removeClass('up').addClass('down');
         } else {
             orderBtn.data('order', 'asc');
-            orderBtn.removeClass('down').addClass('up')
+            orderBtn.removeClass('down').addClass('up');
         }
         applyFilterSort();
     }
-    
+
     function highlightSortedColumn(sortField) {
         // Clear previous highlights
         $('.field').removeClass('field-highlight');
-    
+
         // Add highlight to the sorted column
         $('.field-name').each(function() {
             if ($(this).text().toLowerCase() === sortField.replace('_', ' ')) {
@@ -117,15 +124,15 @@
             }
         });
     }
-    
+
     function blinkEffect() {
         // Apply blink effect to all cards
         $('.card').addClass('field-highlight');
-    
+
         // Remove the class after the animation ends to reset
         setTimeout(() => {
             $('.card').removeClass('field-highlight');
         }, 500); // Duration should match the CSS animation duration
-    }    
+    }
 </script>
 {% endblock %}
