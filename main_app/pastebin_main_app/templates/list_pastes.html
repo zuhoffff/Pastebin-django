@@ -30,7 +30,7 @@
             </select>
 
             <!-- Sort Order Button -->
-            <button type="button" id="sort-order-btn" data-order="desc">
+            <button type="button" id="sort-order-btn" data-order="desc" class = "down">
                 <i></i>
             </button>
 
@@ -97,8 +97,11 @@
     
         if (currentOrder === 'asc') {
             orderBtn.data('order', 'desc');
+            orderBtn.removeClass('up').addClass('down')
+            
         } else {
             orderBtn.data('order', 'asc');
+            orderBtn.removeClass('down').addClass('up')
         }
         applyFilterSort();
     }

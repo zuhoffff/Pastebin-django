@@ -116,14 +116,12 @@ h1 {
     background-color: transparent;
 }
 
-/* Arrow pointing up */
-#sort-order-btn[data-order="asc"] {
-    transform: rotate(-135deg);
+.up {
+    transform: rotate(45deg);
 }
 
-/* Arrow pointing down */
-#sort-order-btn[data-order="desc"] {
-    transform: rotate(45deg);
+.down {
+    transform: rotate(-135deg);
 }
 
 /* Optional: Adjusting color when button is focused */
