@@ -7,7 +7,6 @@
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 <link rel="stylesheet" href="{% static 'list_pastes.css' %}">
 {% endblock %}
-
 {% block content %}
 <div class="container">
     <h1>List of Pastes</h1>
@@ -42,9 +41,24 @@
     </div>
 
     <div id="pastes-container" class="row list-view">
-        <!-- Initial content will be loaded here by Django -->
         {% include 'list_pastes_part.html' %}
     </div>
+
+    <!-- Pagination Controls -->
+    <nav aria-label="Page navigation" id="pagination-nav">
+        <ul class="pagination">
+            <li class="page-item">
+                <button class="page-link" id="previous-page" aria-label="Previous">
+                    <span aria-hidden="true">&laquo;</span>
+                </button>
+            </li>
+            <li class="page-item">
+                <button class="page-link" id="next-page" aria-label="Next">
+                    <span aria-hidden="true">&raquo;</span>
+                </button>
+            </li>
+        </ul>
+    </nav>
 </div>
 
 <!-- Include jQuery -->
@@ -52,9 +66,10 @@
 <!-- FontAwesome for sort order icon -->
 <script src="https://kit.fontawesome.com/a076d05399.js"></script>
 
-<!-- Toggle View Script -->
 <script>
     $(document).ready(function() {
+        let currentPage = 1;
+
         $('#list-view-btn').click(function() {
             $('#pastes-container').removeClass('grid-view').addClass('list-view');
         });
@@ -66,20 +81,27 @@
             toggleSortOrder();
         });
 
-        // Add change event listeners to filter and sort selects
-        $('#filter').change(function() {
-            applyFilterSort();
+        $('#filter, #sort').change(function() {
+            currentPage = 1; // Reset to first page on filter/sort change
+            applyFilterSort(currentPage);
         });
 
-        $('#sort').change(function() {
-            applyFilterSort();
+        $('#previous-page').click(function() {
+            if (currentPage > 1) {
+                currentPage--;
+                applyFilterSort(currentPage);
+            }
         });
 
-        // Apply initial sort and filter based on default values
-        applyFilterSort();
+        $('#next-page').click(function() {
+            currentPage++;
+            applyFilterSort(currentPage);
+        });
+
+        applyFilterSort(currentPage);
     });
 
-    function applyFilterSort() {
+    function applyFilterSort(page) {
         const filter = $('#filter').val();
         const sort = $('#sort').val();
         const order = $('#sort-order-btn').data('order');
@@ -89,12 +111,15 @@
             data: {
                 filter: filter,
                 sort: sort,
-                order: order
+                order: order,
+                page: page
             },
             success: function(response) {
                 $('#pastes-container').html(response.html);
                 highlightSortedColumn(sort);
                 blinkEffect();
+                updatePaginationButtons(response.has_previous, response.has_next);
+                currentPage = response.current_page;
             }
         });
     }
@@ -110,14 +135,11 @@
             orderBtn.data('order', 'asc');
             orderBtn.removeClass('down').addClass('up');
         }
-        applyFilterSort();
+        applyFilterSort(currentPage);
     }
 
     function highlightSortedColumn(sortField) {
-        // Clear previous highlights
         $('.field').removeClass('field-highlight');
-
-        // Add highlight to the sorted column
         $('.field-name').each(function() {
             if ($(this).text().toLowerCase() === sortField.replace('_', ' ')) {
                 $(this).closest('.field').addClass('field-highlight');
@@ -126,13 +148,15 @@
     }
 
     function blinkEffect() {
-        // Apply blink effect to all cards
         $('.card').addClass('field-highlight');
-
-        // Remove the class after the animation ends to reset
         setTimeout(() => {
             $('.card').removeClass('field-highlight');
-        }, 500); // Duration should match the CSS animation duration
+        }, 500);
+    }
+
+    function updatePaginationButtons(hasPrevious, hasNext) {
+        $('#previous-page').prop('disabled', !hasPrevious);
+        $('#next-page').prop('disabled', !hasNext);
     }
 </script>
 {% endblock %}
