@@ -4,7 +4,6 @@
 {% block title %}List of Pastes{% endblock %}
 
 {% block stylesheets %}
-<!-- Include Bootstrap CSS for additional styling -->
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 <link rel="stylesheet" href="{% static 'list_pastes.css' %}">
 {% endblock %}
@@ -15,20 +14,28 @@
 
     <!-- Filter and Sort Options -->
     <div class="mb-3">
-        <label for="filter" class="mr-2">Show:</label>
-        <select id="filter" class="form-control mr-3 d-inline-block" style="width: auto;">
-            <option value="all">All</option>
-            <option value="public">Public Only</option>
-            <option value="private">Private Only</option>
-        </select>
+        <form id="filter-sort-form" class="form-inline">
+            <label for="filter" class="mr-2">Show:</label>
+            <select name="filter" id="filter" class="form-control mr-3">
+                <option value="all">All</option>
+                <option value="public">Public Only</option>
+            </select>
 
-        <label for="sort" class="mr-2">Sort by:</label>
-        <select id="sort" class="form-control d-inline-block" style="width: auto;">
-            <option value="name">Name</option>
-            <option value="slug">Slug</option>
-            <option value="timestamp">Timestamp</option>
-            <option value="expiry_time">Expiry Time</option>
-        </select>
+            <label for="sort" class="mr-2">Sort by:</label>
+            <select name="sort" id="sort" class="form-control mr-3">
+                <option value="name">Name</option>
+                <option value="slug">Slug</option>
+                <option value="timestamp">Timestamp</option>
+                <option value="expiry_time">Expiry Time</option>
+            </select>
+
+            <!-- Sort Order Button -->
+            <button type="button" id="sort-order-btn" data-order="desc">
+                <i></i>
+            </button>
+
+            <button type="button" class="btn btn-primary" onclick="applyFilterSort()">Apply</button>
+        </form>
     </div>
 
     <div class="view-toggle">
@@ -37,99 +44,85 @@
     </div>
 
     <div id="pastes-container" class="row list-view">
-        {% for metadata in metadatas %}
-        <div class="col-md-12 col-lg-4 mb-4 paste-item" data-status="{{ metadata.is_protected }}" 
-             data-name="{{ metadata.name }}" data-slug="{{ metadata.slug }}" 
-             data-timestamp="{{ metadata.timestamp }}" data-expiry-time="{{ metadata.expiry_time }}">
-            <div class="card">
-                <div class="card-header">
-                    {{ metadata.name }} 
-                    <span class="badge {% if metadata.is_protected == 'private' %}badge-private{% else %}badge-public{% endif %} float-right">
-                        {{ metadata.is_protected }}
-                    </span>
-                </div>
-                <div class="card-body">
-                    {% for key, value in metadata.items %}
-                        {% if key == "slug" %}
-                        <div class="field">
-                            <span class="field-name">Link:</span>
-                            <a class="link" href="{% url 'check_protection' value %}">{{ value }}</a>
-                        </div>
-                        {% elif key != "name" and key != "is_protected" %}
-                        <div class="field">
-                            <span class="field-name">{{ key|capfirst }}:</span>
-                            <span>{{ value }}</span>
-                        </div>
-                        {% endif %}
-                    {% endfor %}
-                </div>
-            </div>
-        </div>
-        {% endfor %}
-    </div>
+        <!-- Initial content will be loaded here by Django -->
+        {% include 'list_pastes_part.html' %}
 </div>
 
 <!-- Include jQuery -->
 <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+<!-- FontAwesome for sort order icon -->
+<script src="https://kit.fontawesome.com/a076d05399.js"></script>
 
-<!-- Client-Side Sorting and Filtering Script -->
+<!-- Toggle View Script -->
 <script>
     $(document).ready(function() {
-        // Toggle View
         $('#list-view-btn').click(function() {
             $('#pastes-container').removeClass('grid-view').addClass('list-view');
         });
         $('#grid-view-btn').click(function() {
             $('#pastes-container').removeClass('list-view').addClass('grid-view');
         });
-
-        // Sorting and Filtering
-        $('#filter').change(function() {
-            filterPastes();
+    
+        $('#sort-order-btn').click(function() {
+            toggleSortOrder();
         });
-
-        $('#sort').change(function() {
-            sortPastes();
-        });
-
-        function filterPastes() {
-            var filterValue = $('#filter').val();
-            $('.paste-item').each(function() {
-                var status = $(this).data('status');
-                if (filterValue === 'all' || status === filterValue) {
-                    $(this).show();
-                } else {
-                    $(this).hide();
-                }
-            });
-        }
-
-        function sortPastes() {
-            var sortValue = $('#sort').val();
-            var items = $('.paste-item').toArray();
-
-            items.sort(function(a, b) {
-                var aValue = $(a).data(sortValue);
-                var bValue = $(b).data(sortValue);
-
-                if (sortValue === 'timestamp' || sortValue === 'expiry_time') {
-                    // Parse datetime strings into JavaScript Date objects
-                    aValue = new Date(aValue);
-                    bValue = new Date(bValue);
-                }
-
-                if (aValue < bValue) return -1;
-                if (aValue > bValue) return 1;
-                return 0;
-            });
-
-            // Append sorted items back to the container
-            $('#pastes-container').html(items);
-        }
-
-        // Initial sort and filter
-        sortPastes();
-        filterPastes();
+        
+        // Apply initial sort and filter based on default values
+        applyFilterSort();
     });
+    
+    function applyFilterSort() {
+        const filter = $('#filter').val();
+        const sort = $('#sort').val();
+        const order = $('#sort-order-btn').data('order');
+    
+        $.ajax({
+            url: '',
+            data: {
+                filter: filter,
+                sort: sort,
+                order: order
+            },
+            success: function(response) {
+                $('#pastes-container').html(response.html);
+                highlightSortedColumn(sort);
+                blinkEffect();
+            }
+        });
+    }
+    
+    function toggleSortOrder() {
+        const orderBtn = $('#sort-order-btn');
+        const currentOrder = orderBtn.data('order');
+    
+        if (currentOrder === 'asc') {
+            orderBtn.data('order', 'desc');
+        } else {
+            orderBtn.data('order', 'asc');
+        }
+        applyFilterSort();
+    }
+    
+    function highlightSortedColumn(sortField) {
+        // Clear previous highlights
+        $('.field').removeClass('field-highlight');
+    
+        // Add highlight to the sorted column
+        $('.field-name').each(function() {
+            if ($(this).text().toLowerCase() === sortField.replace('_', ' ')) {
+                $(this).closest('.field').addClass('field-highlight');
+            }
+        });
+    }
+    
+    function blinkEffect() {
+        // Apply blink effect to all cards
+        $('.card').addClass('field-highlight');
+    
+        // Remove the class after the animation ends to reset
+        setTimeout(() => {
+            $('.card').removeClass('field-highlight');
+        }, 500); // Duration should match the CSS animation duration
+    }    
 </script>
 {% endblock %}

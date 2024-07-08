@@ -106,3 +106,39 @@ h1 {
     background-color: #fd7e14; /* Orange */
     color: #fff;
 }
+
+/* Sort order button styles */
+#sort-order-btn {
+    border: solid black;
+    border-width: 0 3px 3px 0;
+    display: inline-block;
+    padding: 7px;
+    background-color: transparent;
+}
+
+/* Arrow pointing up */
+#sort-order-btn[data-order="asc"] {
+    transform: rotate(-135deg);
+}
+
+/* Arrow pointing down */
+#sort-order-btn[data-order="desc"] {
+    transform: rotate(45deg);
+}
+
+/* Optional: Adjusting color when button is focused */
+#sort-order-btn:focus {
+    outline:none;
+}
+
+/* Highlight effect for sorted column */
+.field-highlight {
+    animation: blink 1s ease-in-out;
+}
+
+/* Subtle background blink effect */
+@keyframes blink {
+    0% { background-color: #d1e7fd; }
+    50% { background-color: #f8f9fa; }
+    100% { background-color: #d1e7fd; }
+}
