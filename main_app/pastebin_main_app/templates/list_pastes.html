@@ -44,21 +44,6 @@
         {% include 'list_pastes_part.html' %}
     </div>
 
-    <!-- Pagination Controls -->
-    <nav aria-label="Page navigation" id="pagination-nav">
-        <ul class="pagination">
-            <li class="page-item">
-                <button class="page-link" id="previous-page" aria-label="Previous">
-                    <span aria-hidden="true">&laquo;</span>
-                </button>
-            </li>
-            <li class="page-item">
-                <button class="page-link" id="next-page" aria-label="Next">
-                    <span aria-hidden="true">&raquo;</span>
-                </button>
-            </li>
-        </ul>
-    </nav>
     <!-- Pagination Number selector -->
     <select name="paginate_by" id="paginate_by" class="form-control mr-3">
         <option value="9">9</option>
@@ -66,6 +51,13 @@
         <option value="27">27</option>
     </select>
 </div>
+<!-- Pagination Controls -->
+<button class="pagination-btn" id="previous-page" aria-label="Previous">
+    <span aria-hidden="true">&laquo;</span>
+</button>
+<button class="pagination-btn" id="next-page" aria-label="Next">
+    <span aria-hidden="true">&raquo;</span>
+</button>
 
 <!-- Include jQuery -->
 <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
@@ -126,8 +118,7 @@
                 $('#pastes-container').html(response.html);
                 highlightSortedColumn(sort);
                 blinkEffect();
-                alert(response.context.page_obj.has_next)
-                updatePaginationButtons(response.context.page_obj.has_next, );
+                updatePaginationButtons(response.has_previous, response.has_next);
                 currentPage = response.current_page;
             }
         });
@@ -164,11 +155,20 @@
     }
 
     function updatePaginationButtons(hasPrevious, hasNext) {
-        $('#previous-page').prop('disabled', !hasPrevious);
-        $('#next-page').prop('disabled', !hasNext);
-
-        $('#previous-page').closest('.page-item').toggleClass('disabled', !hasPrevious);
-        $('#next-page').closest('.page-item').toggleClass('disabled', !hasNext);
+        const prevButton = $('#previous-page');
+        const nextButton = $('#next-page');
+        
+        if (hasPrevious) {
+            prevButton.removeClass('disabled');
+        } else {
+            prevButton.addClass('disabled');
+        }
+    
+        if (hasNext) {
+            nextButton.removeClass('disabled');
+        } else {
+            nextButton.addClass('disabled');
+        }
     }
 </script>
 {% endblock %}
