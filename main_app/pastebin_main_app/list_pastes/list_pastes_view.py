@@ -10,7 +10,6 @@ logging.basicConfig(level=logging.INFO, format='%(name)s - %(levelname)s - %(mes
 logger = logging.getLogger(__name__)
  
 # TODO: optimize pagination; use listview pagination tools (instead of sending attributes explicitly)
-# allow user choose pagination number.
 # TODO: add paging buttons to the top of the page
 
 # TODO: update list in realtime when some pastes expire
@@ -18,7 +17,7 @@ logger = logging.getLogger(__name__)
 # TODO: make filtering visuals smoother
 
 class ListPastes(ListView):
-    paginate_by = 10
+    paginate_by = 18 # default
     model=Metadata
     template_name = 'list_pastes.html'
     context_object_name = 'metadatas'
@@ -40,6 +39,7 @@ class ListPastes(ListView):
             sort_param = request.GET.get('sort', 'name')
             order_param = request.GET.get('order', 'asc')
             page = request.GET.get('page', 1)
+            self.paginate_by = request.GET.get('paginate_by')
 
             queryset = self.get_queryset()
 
