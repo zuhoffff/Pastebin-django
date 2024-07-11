@@ -10,10 +10,8 @@ logging.basicConfig(level=logging.INFO, format='%(name)s - %(levelname)s - %(mes
 logger = logging.getLogger(__name__)
  
 # TODO: optimize pagination; use listview pagination tools (instead of sending attributes explicitly)
-# TODO: add paging buttons to the top of the page
+# TODO: repair the paging buttons
 
-# TODO: update list in realtime when some pastes expire
-# TODO: alternate the names of the labels (use expiry time instead of hardcode expiry_time)
 # TODO: make filtering visuals smoother
 
 class ListPastes(ListView):
@@ -61,7 +59,6 @@ class ListPastes(ListView):
                 'has_next': paginated_queryset.has_next(),
                 'has_previous': paginated_queryset.has_previous(),
                 'current_page': paginated_queryset.number,
-                'num_pages': paginator.num_pages
             })
         else:
             return super().get(request, *args, **kwargs)

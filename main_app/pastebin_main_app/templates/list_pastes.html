@@ -67,6 +67,7 @@
 <script>
     $(document).ready(function() {
         let currentPage = 1;
+        let hasNext = true;
 
         $('#list-view-btn').click(function() {
             $('#pastes-container').removeClass('grid-view').addClass('list-view');
@@ -92,8 +93,10 @@
         });
 
         $('#next-page').click(function() {
-            currentPage++;
-            applyFilterSort(currentPage);
+            if (hasNext) {
+                currentPage++;
+                applyFilterSort(currentPage);
+            }
         });
 
         applyFilterSort(currentPage);
@@ -119,6 +122,7 @@
                 highlightSortedColumn(sort);
                 blinkEffect();
                 updatePaginationButtons(response.has_previous, response.has_next);
+                hasNext = response.has_next;
                 currentPage = response.current_page;
             }
         });
@@ -160,15 +164,21 @@
         
         if (hasPrevious) {
             prevButton.removeClass('disabled');
+            prevButton.disabled = false;
         } else {
             prevButton.addClass('disabled');
+            prevButton.disabled = true;
         }
     
         if (hasNext) {
             nextButton.removeClass('disabled');
+            nextButton.disabled = false;
         } else {
             nextButton.addClass('disabled');
+            nextButton.disabled = true;
         }
     }
 </script>
 {% endblock %}
+
+<!--TODO: fix that user can click button when on the last page-->

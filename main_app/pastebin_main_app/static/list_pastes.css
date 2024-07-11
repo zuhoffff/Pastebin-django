@@ -183,3 +183,8 @@ h1 {
     filter: grayscale(80%);
     cursor: not-allowed;
 }
+
+.disabled:hover {
+    transform: none;
+    opacity: 1.0;
+}
