@@ -21,7 +21,7 @@ class CheckProtection(View):
         except self.model.DoesNotExist:
             logger.info('Object does not exist. ')
             return JsonResponse({'message': 'Does not exist'})
-        if self.obj.get_is_protected():
+        if self.obj.is_protected:
             logger.info('Text paste is protected: redirecting')
             return redirect('paste_password_prompt', slug=slug)
         else:
