@@ -16,7 +16,7 @@ class Metadata(models.Model):
     class Meta:
         db_table = 'metadata'
 
-    def is_protected(self):
+    def get_is_protected(self):
         return bool(self.password)
 
     # def compose_key(self):
