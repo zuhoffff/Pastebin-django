@@ -11,7 +11,6 @@
 <div class="container">
     <h1>List of Pastes</h1>
 
-    <!-- Filter and Sort Options -->
     <div class="mb-3">
         <form id="filter-sort-form" class="form-inline">
             <label for="filter" class="mr-2">Show:</label>
@@ -28,7 +27,6 @@
                 <option value="expiry_time">Expiry Time</option>
             </select>
 
-            <!-- Sort Order Button -->
             <button type="button" id="sort-order-btn" data-order="desc" class="down">
                 <i></i>
             </button>
@@ -41,17 +39,16 @@
     </div>
 
     <div id="pastes-container" class="row list-view">
-        {% include 'list_pastes_part.html' %}
+        <!-- Content will be loaded here by JavaScript -->
     </div>
 
-    <!-- Pagination Number selector -->
     <select name="paginate_by" id="paginate_by" class="form-control mr-3">
         <option value="9">9</option>
         <option value="18">18</option>
         <option value="27">27</option>
     </select>
 </div>
-<!-- Pagination Controls -->
+
 <button class="pagination-btn" id="previous-page" aria-label="Previous">
     <span aria-hidden="true">&laquo;</span>
 </button>
@@ -59,9 +56,7 @@
     <span aria-hidden="true">&raquo;</span>
 </button>
 
-<!-- Include jQuery -->
 <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
-<!-- FontAwesome for sort order icon -->
 <script src="https://kit.fontawesome.com/a076d05399.js"></script>
 
 <script>
@@ -72,6 +67,7 @@
         $('#list-view-btn').click(function() {
             $('#pastes-container').removeClass('grid-view').addClass('list-view');
         });
+
         $('#grid-view-btn').click(function() {
             $('#pastes-container').removeClass('list-view').addClass('grid-view');
         });
@@ -81,7 +77,7 @@
         });
 
         $('#filter, #sort, #paginate_by').change(function() {
-            currentPage = 1; // Reset to first page on filter/sort change
+            currentPage = 1; 
             applyFilterSort(currentPage);
         });
 
@@ -109,22 +105,57 @@
         const paginate_by = $('#paginate_by').val();
 
         $.ajax({
-            url: '',
+            url: '{% url "list_pastes_api" %}', // Update this URL to match your Django URL configuration
             data: {
                 filter: filter,
-                sort: sort,
-                order: order,
+                ordering: `${order === 'asc' ? '' : '-'}${sort}`,
                 page: page,
                 paginate_by: paginate_by
             },
             success: function(response) {
-                $('#pastes-container').html(response.html);
-                highlightSortedColumn(sort);
-                blinkEffect();
-                updatePaginationButtons(response.has_previous, response.has_next);
-                hasNext = response.has_next;
-                currentPage = response.current_page;
+                renderPastes(response.results);
+                updatePaginationButtons(response.previous, response.next);
+                hasNext = !!response.next;
+                currentPage = page;
             }
+        });
+    }
+
+    function renderPastes(pastes) {
+        const container = $('#pastes-container');
+        container.empty();
+
+        pastes.forEach(paste => {
+            const pasteHtml = `
+                <div class="col-md-12 col-lg-4 mb-4">
+                    <div class="card">
+                        <div class="card-header">
+                            ${paste.name}
+                            <span class="badge ${paste.is_protected === 'private' ? 'badge-private' : 'badge-public'} float-right">
+                                ${paste.is_protected}
+                            </span>
+                        </div>
+                        <div class="card-body">
+                            <div class="field">
+                                <span class="field-name">Link:</span>
+                                <a class="link" href="/check_protection/${paste.slug}">${paste.slug}</a>
+                            </div>
+                            ${Object.keys(paste).map(key => {
+                                if (key !== 'name' && key !== 'is_protected') {
+                                    return `
+                                        <div class="field">
+                                            <span class="field-name">${key.replace(/_/g, ' ').charAt(0).toUpperCase() + key.replace(/_/g, ' ').slice(1)}:</span>
+                                            <span>${paste[key]}</span>
+                                        </div>
+                                    `;
+                                }
+                                return '';
+                            }).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+            container.append(pasteHtml);
         });
     }
 
@@ -142,43 +173,25 @@
         applyFilterSort(currentPage);
     }
 
-    function highlightSortedColumn(sortField) {
-        $('.field').removeClass('field-highlight');
-        $('.field-name').each(function() {
-            if ($(this).text().toLowerCase() === sortField.replace('_', ' ')) {
-                $(this).closest('.field').addClass('field-highlight');
-            }
-        });
-    }
-
-    function blinkEffect() {
-        $('.card').addClass('field-highlight');
-        setTimeout(() => {
-            $('.card').removeClass('field-highlight');
-        }, 500);
-    }
-
     function updatePaginationButtons(hasPrevious, hasNext) {
         const prevButton = $('#previous-page');
         const nextButton = $('#next-page');
         
         if (hasPrevious) {
             prevButton.removeClass('disabled');
-            prevButton.disabled = false;
+            prevButton.prop('disabled', false);
         } else {
             prevButton.addClass('disabled');
-            prevButton.disabled = true;
+            prevButton.prop('disabled', true);
         }
     
         if (hasNext) {
             nextButton.removeClass('disabled');
-            nextButton.disabled = false;
+            nextButton.prop('disabled', false);
         } else {
             nextButton.addClass('disabled');
-            nextButton.disabled = true;
+            nextButton.prop('disabled', true);
         }
     }
 </script>
 {% endblock %}
-
-<!--TODO: fix that user can click button when on the last page-->

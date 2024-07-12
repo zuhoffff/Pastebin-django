@@ -9,7 +9,7 @@ from django.views import View
 from django.contrib.auth.hashers import check_password
 from django.forms.models import model_to_dict
 from django.urls import reverse
-
+# TODO: add wrong password visuals
 logger = logging.getLogger(__name__)
 
 class CheckProtection(View):

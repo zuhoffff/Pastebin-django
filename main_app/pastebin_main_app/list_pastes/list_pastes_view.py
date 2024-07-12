@@ -14,10 +14,9 @@ from pastebin_main_app.list_pastes.custom_filters import MetadataFilter
 logging.basicConfig(level=logging.INFO, format='%(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
  
-# TODO: optimize pagination; use listview pagination tools (instead of sending attributes explicitly)
-# TODO: repair the paging buttons
-
+# TODO: add paging to the api
 # TODO: make filtering visuals smoother
+# TODO: integrate api with the front-end
 
 class ListPastesApiView(generics.ListAPIView):
     queryset=Metadata.objects.all() # default queryset
@@ -28,7 +27,6 @@ class ListPastesApiView(generics.ListAPIView):
     search_fields = ['name', 'slug', 'author']
 
     def get_queryset(self):
-        
         queryset = super().get_queryset()
         filter_param = self.request.query_params.get('filter', 'all')   
         

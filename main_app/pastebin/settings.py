@@ -34,6 +34,11 @@ ALLOWED_HOSTS = ['localhost',
 
 # Application definition
 
+REST_FRAMEWORK = {
+    'DEFAULT_PAGINATION_CLASS': 'pastebin_main_app.list_pastes.paginator.CustomPagination',
+    'PAGE_SIZE': 10
+    }
+
 INSTALLED_APPS = [
     # default apps:
     'django.contrib.admin',
