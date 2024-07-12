@@ -1,22 +1,25 @@
+<!-- pastes_list.html -->
 {% extends 'base.html' %}
+{% block title %}List of Pastes{% endblock %}
 {% load static %}
 {% load custom_filters %}
-{% block title %}List of Pastes{% endblock %}
-
 {% block stylesheets %}
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 <link rel="stylesheet" href="{% static 'list_pastes.css' %}">
 {% endblock %}
+
 {% block content %}
 <div class="container">
     <h1>List of Pastes</h1>
-
+    
+    <!-- Filter and Sort Options -->
     <div class="mb-3">
         <form id="filter-sort-form" class="form-inline">
             <label for="filter" class="mr-2">Show:</label>
             <select name="filter" id="filter" class="form-control mr-3">
                 <option value="all">All</option>
                 <option value="public">Public Only</option>
+                <option value="protected">Protected Only</option>
             </select>
 
             <label for="sort" class="mr-2">Sort by:</label>
@@ -24,174 +27,76 @@
                 <option value="name">Name</option>
                 <option value="slug">Slug</option>
                 <option value="timestamp">Timestamp</option>
-                <option value="expiry_time">Expiry Time</option>
+                <!-- Add more options as needed -->
             </select>
 
-            <button type="button" id="sort-order-btn" data-order="desc" class="down">
-                <i></i>
+            <!-- Sort Order Button -->
+            <button type="button" id="sort-order-btn" data-order="asc" class="btn btn-light">
+                <i class="fas fa-sort-alpha-down"></i> Asc
             </button>
         </form>
     </div>
 
-    <div class="view-toggle">
-        <button id="list-view-btn" class="btn btn-primary">List View</button>
-        <button id="grid-view-btn" class="btn btn-secondary">Grid View</button>
-    </div>
-
-    <div id="pastes-container" class="row list-view">
-        <!-- Content will be loaded here by JavaScript -->
-    </div>
-
-    <select name="paginate_by" id="paginate_by" class="form-control mr-3">
-        <option value="9">9</option>
-        <option value="18">18</option>
-        <option value="27">27</option>
-    </select>
-</div>
-
-<button class="pagination-btn" id="previous-page" aria-label="Previous">
-    <span aria-hidden="true">&laquo;</span>
-</button>
-<button class="pagination-btn" id="next-page" aria-label="Next">
-    <span aria-hidden="true">&raquo;</span>
-</button>
-
-<script src="https://code.jquery.com/jquery-3.5.1.js"></script>
-<script src="https://kit.fontawesome.com/a076d05399.js"></script>
-
-<script>
-    $(document).ready(function() {
-        let currentPage = 1;
-        let hasNext = true;
-
-        $('#list-view-btn').click(function() {
-            $('#pastes-container').removeClass('grid-view').addClass('list-view');
-        });
-
-        $('#grid-view-btn').click(function() {
-            $('#pastes-container').removeClass('list-view').addClass('grid-view');
-        });
-
-        $('#sort-order-btn').click(function() {
-            toggleSortOrder();
-        });
-
-        $('#filter, #sort, #paginate_by').change(function() {
-            currentPage = 1; 
-            applyFilterSort(currentPage);
-        });
-
-        $('#previous-page').click(function() {
-            if (currentPage > 1) {
-                currentPage--;
-                applyFilterSort(currentPage);
-            }
-        });
-
-        $('#next-page').click(function() {
-            if (hasNext) {
-                currentPage++;
-                applyFilterSort(currentPage);
-            }
-        });
-
-        applyFilterSort(currentPage);
-    });
-
-    function applyFilterSort(page) {
-        const filter = $('#filter').val();
-        const sort = $('#sort').val();
-        const order = $('#sort-order-btn').data('order');
-        const paginate_by = $('#paginate_by').val();
-
-        $.ajax({
-            url: '{% url "list_pastes_api" %}', // Update this URL to match your Django URL configuration
-            data: {
-                filter: filter,
-                ordering: `${order === 'asc' ? '' : '-'}${sort}`,
-                page: page,
-                paginate_by: paginate_by
-            },
-            success: function(response) {
-                renderPastes(response.results);
-                updatePaginationButtons(response.previous, response.next);
-                hasNext = !!response.next;
-                currentPage = page;
-            }
-        });
-    }
-
-    function renderPastes(pastes) {
-        const container = $('#pastes-container');
-        container.empty();
-
-        pastes.forEach(paste => {
-            const pasteHtml = `
-                <div class="col-md-12 col-lg-4 mb-4">
-                    <div class="card">
-                        <div class="card-header">
-                            ${paste.name}
-                            <span class="badge ${paste.is_protected === 'private' ? 'badge-private' : 'badge-public'} float-right">
-                                ${paste.is_protected}
-                            </span>
-                        </div>
-                        <div class="card-body">
-                            <div class="field">
-                                <span class="field-name">Link:</span>
-                                <a class="link" href="/check_protection/${paste.slug}">${paste.slug}</a>
-                            </div>
-                            ${Object.keys(paste).map(key => {
-                                if (key !== 'name' && key !== 'is_protected') {
-                                    return `
-                                        <div class="field">
-                                            <span class="field-name">${key.replace(/_/g, ' ').charAt(0).toUpperCase() + key.replace(/_/g, ' ').slice(1)}:</span>
-                                            <span>${paste[key]}</span>
-                                        </div>
-                                    `;
-                                }
-                                return '';
-                            }).join('')}
-                        </div>
-                    </div>
+    <div class="row" id="pastes-container">
+        {% for metadata in metadata_list %}
+        <div class="col-md-12 col-lg-4 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    {{ metadata.name }}
+                    <span class="badge {% if metadata.is_protected %}badge-private{% else %}badge-public{% endif %} float-right">
+                        {% if metadata.is_protected %}Private{% else %}Public{% endif %}
+                    </span>
                 </div>
-            `;
-            container.append(pasteHtml);
-        });
-    }
+                <div class="card-body">
+                    <div class="field">
+                        <span class="field-name">Link:</span>
+                        <a class="link" href="{% url 'check_protection' metadata.slug %}">{{ metadata.slug }}</a>
+                    </div>
+                    {% for key, value in metadata.items %}
+                        {% if key != "name" and key != "password" %}
+                        <div class="field">
+                            <span class="field-name">{{ key|capfirst }}</span>:
+                            <span>{{ value }}</span>
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
 
-    function toggleSortOrder() {
-        const orderBtn = $('#sort-order-btn');
-        const currentOrder = orderBtn.data('order');
+    <!-- Pagination Controls -->
+    <div id="pagination" class="mt-4">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="#" data-page="{{ page_obj.previous_page_number }}">Previous</a>
+            </li>
+            {% else %}
+            <li class="page-item disabled">
+                <span class="page-link">Previous</span>
+            </li>
+            {% endif %}
 
-        if (currentOrder === 'asc') {
-            orderBtn.data('order', 'desc');
-            orderBtn.removeClass('up').addClass('down');
-        } else {
-            orderBtn.data('order', 'asc');
-            orderBtn.removeClass('down').addClass('up');
-        }
-        applyFilterSort(currentPage);
-    }
+            <li class="page-item">
+                <span class="page-link">{{ page_obj.number }}</span>
+            </li>
 
-    function updatePaginationButtons(hasPrevious, hasNext) {
-        const prevButton = $('#previous-page');
-        const nextButton = $('#next-page');
-        
-        if (hasPrevious) {
-            prevButton.removeClass('disabled');
-            prevButton.prop('disabled', false);
-        } else {
-            prevButton.addClass('disabled');
-            prevButton.prop('disabled', true);
-        }
-    
-        if (hasNext) {
-            nextButton.removeClass('disabled');
-            nextButton.prop('disabled', false);
-        } else {
-            nextButton.addClass('disabled');
-            nextButton.prop('disabled', true);
-        }
-    }
-</script>
+            {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="#" data-page="{{ page_obj.next_page_number }}">Next</a>
+            </li>
+            {% else %}
+            <li class="page-item disabled">
+                <span class="page-link">Next</span>
+            </li>
+            {% endif %}
+        </ul>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+
 {% endblock %}

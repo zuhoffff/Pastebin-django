@@ -1,38 +1,16 @@
-from django.views.generic import ListView
-from pastebin_main_app.models import Metadata
-from django.db.models import Case, Value, When, CharField
-import logging
-from django.http.response import JsonResponse
-from django.template.loader import render_to_string
-from django.core.paginator import Paginator
-from rest_framework import generics, filters
-from rest_framework.response import Response
-from django_filters.rest_framework import DjangoFilterBackend
-from pastebin_main_app.serializers import MetadataSerializer
-from pastebin_main_app.list_pastes.custom_filters import MetadataFilter
+# views.py
+from django.shortcuts import render
+from django.views.generic import TemplateView
+from django.urls import reverse
+import requests
 
-logging.basicConfig(level=logging.INFO, format='%(name)s - %(levelname)s - %(message)s')
-logger = logging.getLogger(__name__)
- 
-# TODO: add paging to the api
-# TODO: make filtering visuals smoother
-# TODO: integrate api with the front-end
-
-class ListPastesApiView(generics.ListAPIView):
-    queryset=Metadata.objects.all() # default queryset
-    serializer_class = MetadataSerializer
-    filter_backends=[DjangoFilterBackend,filters.OrderingFilter, filters.SearchFilter]
-    filterset_class = MetadataFilter # custom filter for sorting by private/public
-    ordering_fields = ['name', 'slug', 'timestamp', 'expiry_time', 'author']
-    search_fields = ['name', 'slug', 'author']
-
-    def get_queryset(self):
-        queryset = super().get_queryset()
-        filter_param = self.request.query_params.get('filter', 'all')   
-        
-        if filter_param == 'public':
-            queryset = queryset.filter(password__isnull=True)
-        elif filter_param == 'private':
-            queryset = queryset.exclude(password__isnull=True)
-        
-        return queryset
+#ALTERNATIVE INTERFACE FOR INTERACTION WITH API
+class ListPastesView(TemplateView):
+    template_name = 'list_pastes.html'
+    
+    # make request to my api:
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        api_url = self.request.build_absolute_uri(reverse('pastes_api'))
+        context['pastes'] = requests.get(api_url)
+        return context
