@@ -1,4 +1,4 @@
 .env
 .idea
 .vscode
-# TODO: exclude pycache
+__pycache__/
