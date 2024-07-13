@@ -2,8 +2,7 @@ from django.urls import path
 from pastebin_main_app.submit_text.submit_text_view import SubmitTextView
 from pastebin_main_app.get_text.get_text_view import PasswordPromptView, PasteDetailView, CheckProtection
 from pastebin_main_app.homepage.home_view import HomePage
-from pastebin_main_app.list_pastes.list_pastes_api_view import ListPastesApiView
-from pastebin_main_app.list_pastes.list_pastes_view import ListPastesView 
+from pastebin_main_app.list_pastes.list_pastes_api_viewset import ListPastesApiSet
 
 urlpatterns = [
     path('/', HomePage.as_view(), name='home'),
@@ -16,10 +15,8 @@ urlpatterns = [
     path('paste/<str:slug>/password', PasswordPromptView.as_view(), name='paste_password_prompt'),
     path('paste/<str:slug>/view/',PasteDetailView.as_view(), name='paste_detail_view'),
     path('paste/<str:slug>/view',PasteDetailView.as_view(), name='paste_detail_view'),
-    # path('list_pastes/',ListPastesView.as_view(), name='list_pastes'),
-    # path('list_pastes',ListPastesView.as_view(), name='list_pastes'),
 
     # API
-    path('list_pastes',ListPastesApiView.as_view(), name='list_pastes'),
-    path('list_pastes/',ListPastesApiView.as_view(), name='list_pastes'),
+    path('list_pastes',ListPastesApiSet.as_view({'get': 'list',}), name='list_pastes'),
+    path('list_pastes/',ListPastesApiSet.as_view({'get': 'list',}), name='list_pastes'),
 ]

@@ -1,4 +1,3 @@
-<!-- pastes_list.html -->
 {% extends 'base.html' %}
 {% block title %}List of Pastes{% endblock %}
 {% load static %}
@@ -17,22 +16,27 @@
         <form id="filter-sort-form" class="form-inline">
             <label for="filter" class="mr-2">Show:</label>
             <select name="filter" id="filter" class="form-control mr-3">
-                <option value="all">All</option>
-                <option value="public">Public Only</option>
-                <option value="protected">Protected Only</option>
+                <option value="all" {% if not request.GET.is_protected %}selected{% endif %}>All</option>
+                <option value="false" {% if request.GET.is_protected == "false" %}selected{% endif %}>Public Only</option>
+                <option value="true" {% if request.GET.is_protected == "true" %}selected{% endif %}>Protected Only</option>
             </select>
-
+            
             <label for="sort" class="mr-2">Sort by:</label>
             <select name="sort" id="sort" class="form-control mr-3">
-                <option value="name">Name</option>
-                <option value="slug">Slug</option>
-                <option value="timestamp">Timestamp</option>
-                <!-- Add more options as needed -->
+                <option value="name" {% if "name" in request.GET.ordering %}selected{% endif %}>Name</option>
+                <option value="slug" {% if "slug" in request.GET.ordering %}selected{% endif %}>Slug</option>
+                <option value="timestamp" {% if "timestamp" in request.GET.ordering %}selected{% endif %}>Timestamp</option>
+                <option value="expiry_time" {% if "expiry_time" in request.GET.ordering %}selected{% endif %}>Expiry time</option>
+                <option value="author" {% if "author" in request.GET.ordering %}selected{% endif %}>Author</option>
             </select>
 
             <!-- Sort Order Button -->
-            <button type="button" id="sort-order-btn" data-order="asc" class="btn btn-light">
+            <button type="button" id="sort-order-btn" data-order={% if "-" in request.GET.ordering %}desc{% else %}asc{% endif %} class="btn btn-light">
+                {% if "-" in request.GET.ordering %}
+                <i class="fas fa-sort-alpha-up-alt"></i> Desc
+                {% else %}
                 <i class="fas fa-sort-alpha-down"></i> Asc
+                {% endif %}
             </button>
         </form>
     </div>
@@ -98,5 +102,40 @@
 {% endblock %}
 
 {% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const filterSelect = document.getElementById('filter');
+        const sortSelect = document.getElementById('sort');
+        const sortOrderBtn = document.getElementById('sort-order-btn');
+        const paginationLinks = document.querySelectorAll('#pagination .page-link');
 
+        function updateQueryParams() {
+            const params = new URLSearchParams(window.location.search);
+            const isProtectedValue = filterSelect.value !== 'all' ? filterSelect.value : '';
+            params.set('is_protected', isProtectedValue);
+            const sortOrderValue = sortOrderBtn.getAttribute('data-order') === 'desc' ? '-' : '';
+            params.set('ordering', sortOrderValue + sortSelect.value);
+            params.delete('page'); // Reset to first page on new query
+            window.location.search = params.toString();
+        }
+
+        filterSelect.addEventListener('change', updateQueryParams);
+        sortSelect.addEventListener('change', updateQueryParams);
+        sortOrderBtn.addEventListener('click', function () {
+            const currentOrder = sortOrderBtn.getAttribute('data-order');
+            const newOrder = currentOrder === 'asc' ? 'desc' : 'asc';
+            sortOrderBtn.setAttribute('data-order', newOrder);
+            updateQueryParams();
+        });
+
+        paginationLinks.forEach(link => {
+            link.addEventListener('click', function (event) {
+                event.preventDefault();
+                const params = new URLSearchParams(window.location.search);
+                params.set('page', this.getAttribute('data-page'));
+                window.location.search = params.toString();
+            });
+        });
+    });
+</script>
 {% endblock %}
