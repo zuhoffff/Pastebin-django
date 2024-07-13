@@ -11,7 +11,7 @@ logging.basicConfig(level=logging.INFO, format='%(name)s - %(levelname)s - %(mes
 logger = logging.getLogger(__name__)
  
 # TODO: make filtering visuals smoother
-# TODO: integrate api with the front-end
+# TODO: improve pagination
 
 class ListPastesApiSet(viewsets.ReadOnlyModelViewSet):
     template_name = 'list_pastes.html'
